@@ -97,7 +97,6 @@ MORE_LINKS = [
     {"group": "AI", "title": "Copilot", "url": "https://copilot.microsoft.com"},
     {"group": "AI", "title": "NotebookLM", "url": "https://notebooklm.google.com"},
     {"group": "AI", "title": "뤼튼", "url": "https://wrtn.ai"},
-    {"group": "AI", "title": "클로바X", "url": "https://clova-x.naver.com"},
     {"group": "AI", "title": "DeepL 번역", "url": "https://www.deepl.com"},
     {"group": "학교·행정", "title": "나이스플러스", "url": "https://www.neisplus.kr"},
     {"group": "학교·행정", "title": "나이스 대국민서비스", "url": "https://www.neis.go.kr"},
@@ -783,7 +782,7 @@ def manifest():
     return jsonify({
         "name": SCHOOL_NAME, "short_name": APP_SHORT_NAME, "start_url": "/", "display": "standalone",
         "background_color": "#ffffff", "theme_color": "#e9963c",
-        "icons": [{"src": "/icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}],
+        "icons": [{"src": "/icon.png", "sizes": "192x192", "type": "image/png", "purpose": "any"}],
     })
 
 
