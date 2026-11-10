@@ -1,0 +1,42 @@
+# 급식 알림 도우미. 10분마다 앱 서버를 깨워서
+#  1) 저장해 둔 알림 구독 묶음(암호화됨)을 서버에 돌려주고
+#  2) 아침 7시, 점심 12시, 저녁 6시가 되었으면 급식 알림을 보내게 하고
+#  3) 새로 생긴 구독을 push-data 가지에 저장한다.
+name: meal-push
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: meal-push
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      APP: https://ushs-student.onrender.com
+      REPO: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+    steps:
+      - name: sync and push
+        run: |
+          set -u
+          git clone -q --depth 1 --branch push-data "$REPO" data 2>/dev/null || {
+            mkdir data && cd data && git init -q && git checkout -q -b push-data && git remote add origin "$REPO" && cd ..
+          }
+          cd data
+          # 서버가 자고 있으면 깨어날 때까지 기다림
+          curl -fsS --retry 8 --retry-delay 10 --retry-all-errors -m 60 -o /dev/null "$APP/status"
+          if [ -s subs.txt ]; then
+            curl -fsS -m 30 -X POST -H "Content-Type: text/plain" --data-binary @subs.txt "$APP/api/push/restore" || true
+          fi
+          echo; curl -fsS -m 30 "$APP/cron/meal-push" || true
+          echo; curl -fsS -m 30 -o new.txt "$APP/api/push/blob" || exit 0
+          if [ -s new.txt ] && ! cmp -s new.txt subs.txt; then
+            mv new.txt subs.txt
+            git add subs.txt
+            git -c user.name="meal-push" -c user.email="meal-push@users.noreply.github.com" commit -qm "sync"
+            git push -q origin push-data
+          fi
