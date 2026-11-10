@@ -4,7 +4,7 @@
 
 하는 일
   급식(조식·중식·석식), 학사일정 → 나이스(NEIS)에서 자동으로 가져옴
-  행사, 동아리, 홍보, 링크(기상곡 신청, 실험실 신청, 학습실 위치알리미) → 아래 설정에 적은 내용으로 안내
+  행사, 동아리, 홍보, 링크(기상곡 신청, 실험실 신청, 학교 위치알리미, 나이스 학부모서비스), 학교 기사 → 아래 설정에 적은 내용으로 안내
 
 올리는 곳:  GitHub 저장소에 app.py, page.py, requirements.txt 를 올리고 Render 또는 Vercel 에 연결
            Render: Build Command = pip install -r requirements.txt / Start Command = python app.py
@@ -75,21 +75,14 @@ LINKS = [
         "desc": "학교 구글 계정(@ushs.hs.kr)으로 로그인해야 열려요. 카톡에서 안 열리면 오른쪽 위 메뉴에서 '다른 브라우저로 열기'를 눌러 보세요.",
         "url": "https://script.google.com/a/macros/ushs.hs.kr/s/AKfycbwBclQ5njll0mmySd74avm2zbHOMqZ4dqKfgveHE897OXVTXLfr7MhkPxKNPkxLkRJSbw/exec",
         "button": "열기",
-        "keywords": ["학교 위치알리미", "학교 위치"],
+        "keywords": ["위치알리미", "위치 알리미", "학교 위치", "위치"],
     },
     {
-        "title": "현장체험학습 신청서",
-        "desc": "현장체험학습 신청서를 작성하러 가요.",
-        "url": "",   # ← 신청서 주소를 여기에 넣으면 앱과 챗봇에 바로 나타남 (비어 있으면 숨겨짐)
-        "button": "작성하러 가기",
-        "keywords": ["현장체험", "체험학습", "신청서"],
-    },
-    {
-        "title": "학습실 위치알리미",
-        "desc": "학교 구글 계정(@ushs.hs.kr)으로 로그인해야 열려요. 카톡에서 안 열리면 오른쪽 위 메뉴에서 '다른 브라우저로 열기'를 눌러 보세요.",
-        "url": "https://script.google.com/a/macros/ushs.hs.kr/s/AKfycbwgOU6e7XZhSiszoH6_xPvyHH-W0opNGVKG5msiECVHAJP8NaMhMbYMaYXTdLocGoMrxQ/exec",
+        "title": "나이스 학부모서비스",
+        "desc": "현장체험학습 신청서 등 각종 신청과 조회를 할 수 있어요.",
+        "url": "https://parents.neis.go.kr",
         "button": "열기",
-        "keywords": ["위치알리미", "위치 알리미", "학습실", "위치"],
+        "keywords": ["학부모서비스", "학부모 서비스", "현장체험", "체험학습", "신청서", "나이스"],
     },
 ]
 
@@ -292,10 +285,11 @@ BLOCKS = {
     "링크 모음": "links",
     "학교 기사": "news",
     "학교 위치알리미": "link:학교 위치알리미",
-    "현장체험학습 신청서": "link:현장체험학습 신청서",
+    "현장체험학습 신청서": "link:나이스 학부모서비스",
+    "나이스 학부모서비스": "link:나이스 학부모서비스",
     "기상곡 신청": "link:기상곡 신청",
     "실험실 신청": "link:화학실·생물실 신청",
-    "위치알리미": "link:학습실 위치알리미",
+    "위치알리미": "link:학교 위치알리미",
 }
 
 
@@ -737,7 +731,7 @@ def api_news():
 def manifest():
     return jsonify({
         "name": SCHOOL_NAME, "short_name": APP_SHORT_NAME, "start_url": "/", "display": "standalone",
-        "background_color": "#f4f1ea", "theme_color": "#0b5d4b",
+        "background_color": "#ffffff", "theme_color": "#e9963c",
         "icons": [{"src": "/icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}],
     })
 
