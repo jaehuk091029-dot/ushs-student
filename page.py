@@ -56,6 +56,10 @@ button{font:inherit; cursor:pointer}
 .row .d{white-space:pre-line}
 .noti{margin-top:12px; font-size:14px; color:#e6dfd6; display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center}
 .noti button{background:#fff; color:#333; border:1px solid #4a4138; padding:6px 12px; font-size:14px; font-weight:700}
+.noti ol{margin:4px 0 0; padding-left:20px; flex-basis:100%; line-height:1.7}
+.noti ol li{font-size:14px; padding:0}
+.noti ol li:before{display:none}
+.noti b{color:#fff}
 .noti button.on{background:#2b2520; color:#fff; border-color:#2b2520}
 .today{display:none; margin-top:10px; background:none; border:0; color:#fff; font-size:14px; text-decoration:underline; padding:0}
 .today.on{display:inline-block}
@@ -152,7 +156,7 @@ footer a{text-decoration:underline}
     <button class="nav" id="next" aria-label="다음 날">▶</button>
   </div>
   <button class="today" id="today">지금 급식으로 돌아가기</button>
-  <div class="noti" id="noti" hidden><button id="nbtn"></button><button id="ntest" hidden>알림 시험해 보기</button><span id="nmsg"></span></div>
+  <div class="noti" id="noti" hidden><button id="nbtn"></button><button id="ntest" hidden>알림 시험해 보기</button><button id="nopen" hidden></button><button id="ninst" hidden>홈 화면에 앱 설치</button><span id="nmsg"></span></div>
 </div></div>
 
 <div class="wrap body">
@@ -389,10 +393,35 @@ footer a{text-decoration:underline}
     var ua = navigator.userAgent, ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
     var inapp = /KAKAOTALK|NAVER\(|Instagram|FBAN|FBAV|Line\/|DaumApps|everytimeApp|; wv\)/i.test(ua);
     function cant(msg){ $("noti").hidden = false; $("nbtn").hidden = true; $("ntest").hidden = true; $("nmsg").textContent = msg; }
+    function steps(title, list){
+      cant(title);
+      var ol = el("ol");
+      list.forEach(function(t){ var li = el("li"); li.innerHTML = t; ol.appendChild(li); });
+      $("noti").appendChild(ol);
+    }
+    var standalone = navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+    var here = location.host + location.pathname;
+    if (inapp){
+      // 카톡·네이버 같은 앱 안의 브라우저는 알림을 못 켜므로, 한 번 눌러서 진짜 브라우저로 넘어가게 함
+      var ext = /KAKAOTALK/i.test(ua) ? "kakaotalk://web/openExternal?url=" + encodeURIComponent("https://" + here)
+              : ios ? "x-safari-https://" + here
+              : "intent://" + here + "#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=" + encodeURIComponent("https://" + here) + ";end";
+      cant("급식 알림은 " + (ios ? "사파리" : "크롬") + "에서 켤 수 있어요.");
+      $("nopen").hidden = false;
+      $("nopen").textContent = ios ? "사파리로 열기" : "크롬으로 열기";
+      $("nopen").setAttribute("data-href", ext);
+      $("nopen").onclick = function(){ location.href = ext; };
+      return;
+    }
+    if (ios && !standalone){
+      steps("아이폰은 홈 화면에 추가해야 급식 알림을 받을 수 있어요. 한 번만 하면 돼요.", [
+        "화면 아래(또는 위)의 <b>공유 버튼</b>(네모에서 화살표가 나오는 모양)을 눌러요.",
+        "<b>홈 화면에 추가</b>를 누르고 <b>추가</b>를 눌러요.",
+        "홈 화면에 생긴 <b>__SHORT__</b> 앱을 열고 <b>급식 알림 받기</b>를 눌러요."]);
+      return;
+    }
     if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)){
-      if (inapp) cant("급식 알림: 카톡 같은 앱 안에서는 켤 수 없어요. 오른쪽 위(또는 아래) 메뉴에서 '다른 브라우저로 열기'를 누른 뒤 켜 주세요.");
-      else if (ios) cant("급식 알림: 아이폰은 사파리에서 공유 버튼 → '홈 화면에 추가'로 앱을 만든 뒤, 그 앱을 열어서 켤 수 있어요.");
-      else cant("급식 알림: 이 브라우저에서는 켤 수 없어요. 크롬이나 삼성 인터넷으로 열어 주세요.");
+      cant(ios ? "급식 알림: 아이폰 소프트웨어를 16.4 이상으로 업데이트하면 켤 수 있어요." : "급식 알림: 이 브라우저에서는 켤 수 없어요. 크롬이나 삼성 인터넷으로 열어 주세요.");
       return;
     }
     getJSON("/api/push/key").then(function(k){
@@ -422,6 +451,11 @@ footer a{text-decoration:underline}
       });
     }).catch(function(){ notiUI(null, "알림을 켜지 못했어요. 잠시 뒤 다시 눌러 주세요."); });
   };
+  // 안드로이드 크롬: 한 번 눌러 홈 화면에 앱으로 설치
+  var instEvt = null;
+  window.addEventListener("beforeinstallprompt", function(e){ e.preventDefault(); instEvt = e; $("noti").hidden = false; $("ninst").hidden = false; });
+  window.addEventListener("appinstalled", function(){ $("ninst").hidden = true; });
+  $("ninst").onclick = function(){ if (instEvt){ instEvt.prompt(); instEvt = null; $("ninst").hidden = true; } };
   $("ntest").onclick = function(){
     swReg.pushManager.getSubscription().then(function(sub){
       if (!sub) return;
