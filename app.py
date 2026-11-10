@@ -29,6 +29,9 @@ import time
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
+import xml.etree.ElementTree as ET
+from email.utils import parsedate_to_datetime
+
 import requests
 from flask import Flask, request, jsonify
 
@@ -68,6 +71,20 @@ LINKS = [
         "keywords": ["화학실", "생물실", "실험실", "실험실 신청", "실험실 예약"],
     },
     {
+        "title": "학교 위치알리미",
+        "desc": "학교 구글 계정(@ushs.hs.kr)으로 로그인해야 열려요. 카톡에서 안 열리면 오른쪽 위 메뉴에서 '다른 브라우저로 열기'를 눌러 보세요.",
+        "url": "https://script.google.com/a/macros/ushs.hs.kr/s/AKfycbwBclQ5njll0mmySd74avm2zbHOMqZ4dqKfgveHE897OXVTXLfr7MhkPxKNPkxLkRJSbw/exec",
+        "button": "열기",
+        "keywords": ["학교 위치알리미", "학교 위치"],
+    },
+    {
+        "title": "현장체험학습 신청서",
+        "desc": "현장체험학습 신청서를 작성하러 가요.",
+        "url": "",   # ← 신청서 주소를 여기에 넣으면 앱과 챗봇에 바로 나타남 (비어 있으면 숨겨짐)
+        "button": "작성하러 가기",
+        "keywords": ["현장체험", "체험학습", "신청서"],
+    },
+    {
         "title": "학습실 위치알리미",
         "desc": "학교 구글 계정(@ushs.hs.kr)으로 로그인해야 열려요. 카톡에서 안 열리면 오른쪽 위 메뉴에서 '다른 브라우저로 열기'를 눌러 보세요.",
         "url": "https://script.google.com/a/macros/ushs.hs.kr/s/AKfycbwgOU6e7XZhSiszoH6_xPvyHH-W0opNGVKG5msiECVHAJP8NaMhMbYMaYXTdLocGoMrxQ/exec",
@@ -75,6 +92,39 @@ LINKS = [
         "keywords": ["위치알리미", "위치 알리미", "학습실", "위치"],
     },
 ]
+
+# 3-1. 링크 모음 (앱 맨 아래 "링크 모음"과 챗봇 "링크 모음"에 나옴)
+#    group 이 같은 것끼리 묶여 나옴. 한 줄 추가하면 바로 늘어남. "학교 홈페이지"는 나이스에서 자동으로 찾아 넣음
+MORE_LINKS = [
+    {"group": "학교·행정", "title": "나이스플러스", "url": "https://www.neisplus.kr"},
+    {"group": "학교·행정", "title": "나이스 대국민서비스", "url": "https://www.neis.go.kr"},
+    {"group": "학교·행정", "title": "울산광역시교육청", "url": "https://www.use.go.kr"},
+    {"group": "학교·행정", "title": "학교알리미", "url": "https://www.schoolinfo.go.kr"},
+    {"group": "학교·행정", "title": "정부24", "url": "https://www.gov.kr"},
+    {"group": "입시·학습", "title": "대입정보포털 어디가", "url": "https://www.adiga.kr"},
+    {"group": "입시·학습", "title": "KAIST 입학", "url": "https://admission.kaist.ac.kr"},
+    {"group": "입시·학습", "title": "UNIST", "url": "https://www.unist.ac.kr"},
+    {"group": "입시·학습", "title": "POSTECH", "url": "https://www.postech.ac.kr"},
+    {"group": "입시·학습", "title": "서울대 입학", "url": "https://admission.snu.ac.kr"},
+    {"group": "입시·학습", "title": "EBSi", "url": "https://www.ebsi.co.kr"},
+    {"group": "탐구·연구", "title": "RISS 학술연구정보", "url": "https://www.riss.kr"},
+    {"group": "탐구·연구", "title": "구글 학술검색", "url": "https://scholar.google.com"},
+    {"group": "탐구·연구", "title": "ScienceON", "url": "https://scienceon.kisti.re.kr"},
+    {"group": "탐구·연구", "title": "NCBI", "url": "https://www.ncbi.nlm.nih.gov"},
+    {"group": "탐구·연구", "title": "arXiv", "url": "https://arxiv.org"},
+    {"group": "탐구·연구", "title": "KOSIS 국가통계", "url": "https://kosis.kr"},
+    {"group": "탐구·연구", "title": "공공데이터포털", "url": "https://www.data.go.kr"},
+    {"group": "도구", "title": "Desmos 그래프", "url": "https://www.desmos.com/calculator"},
+    {"group": "도구", "title": "GeoGebra", "url": "https://www.geogebra.org"},
+    {"group": "도구", "title": "WolframAlpha", "url": "https://www.wolframalpha.com"},
+    {"group": "도구", "title": "PhET 시뮬레이션", "url": "https://phet.colorado.edu/ko/"},
+    {"group": "도구", "title": "백준", "url": "https://www.acmicpc.net"},
+    {"group": "도구", "title": "기상청 날씨누리", "url": "https://www.weather.go.kr"},
+]
+
+# 3-2. 학교 기사 (구글 뉴스에서 아래 낱말로 검색해 제목에 그 낱말이 들어간 기사만 보여 줌)
+NEWS_WORDS = ["울산과학고", "울산과고"]
+NEWS_COUNT = 8             # 보여 줄 기사 수
 
 # 4. 동아리
 #    category 로 분야를 나누면 "학술 동아리"처럼 분야별로 볼 수 있음
@@ -204,9 +254,13 @@ def quick(label, text=None):
     return {"label": str(label)[:14], "action": "message", "messageText": text or label}
 
 
+def live_links():
+    return [l for l in LINKS if l.get("url")]   # 주소가 비어 있는 링크는 숨김
+
+
 def main_quick():
-    base = [quick(t) for t in ["오늘 급식", "내일 급식", "학사일정", "행사", "동아리", "홍보"]]
-    links = [quick(l["title"]) for l in LINKS[:3]]
+    base = [quick(t) for t in ["오늘 급식", "내일 급식", "학사일정", "학교 기사", "행사", "동아리", "홍보"]]
+    links = [quick(l["title"]) for l in live_links()[:2]]
     return (base + links + [quick("링크 모음")])[:10]
 
 
@@ -236,6 +290,9 @@ BLOCKS = {
     "동아리": "clubs",
     "홍보": "promo",
     "링크 모음": "links",
+    "학교 기사": "news",
+    "학교 위치알리미": "link:학교 위치알리미",
+    "현장체험학습 신청서": "link:현장체험학습 신청서",
     "기상곡 신청": "link:기상곡 신청",
     "실험실 신청": "link:화학실·생물실 신청",
     "위치알리미": "link:학습실 위치알리미",
@@ -244,10 +301,12 @@ BLOCKS = {
 
 def by_words(utter):
     u = squash(utter)
-    for l in LINKS:
+    for l in live_links():
         words = [l["title"]] + l.get("keywords", [])
         if any(squash(w) in u for w in words):
             return "link:" + l["title"]
+    if re.search(r"기사|뉴스|신문|보도", u):
+        return "news"
     if re.search(r"급식|식단|밥|조식|중식|석식|아침|점심|저녁", u):
         return "meal"
     if "동아리" in u:
@@ -268,9 +327,11 @@ def by_words(utter):
 def handle(utter, block=""):
     what = by_words(utter) or BLOCKS.get((block or "").strip(), "")
     if what.startswith("link:"):
-        for l in LINKS:
+        for l in live_links():
             if l["title"] == what[5:]:
                 return one_link(l)
+    if what == "news":
+        return news()
     if what == "meal":
         return meal(utter)
     if what == "schedule":
@@ -473,9 +534,75 @@ def promo():
 
 # ---------- 링크 ----------
 
+def more_links():
+    out = []
+    try:
+        rows = neis("schoolInfo", {"ATPT_OFCDC_SC_CODE": ATPT_CODE, "SD_SCHUL_CODE": SCHOOL_CODE or school_code()}, with_school=False)
+        home = (rows[0].get("HMPG_ADRES") or "").strip() if rows else ""
+        if home:
+            out.append({"group": "학교·행정", "title": "학교 홈페이지", "url": home if home.startswith("http") else "http://" + home})
+    except Exception as e:
+        print("[오류] 학교 홈페이지", repr(e))
+    return out + [m for m in MORE_LINKS if m.get("url")]
+
+
 def all_links():
-    items = [card(l["title"], l["desc"], [link_button(l.get("button") or "열기", l["url"])]) for l in LINKS]
-    return reply([carousel("textCard", items)])
+    items = [card(l["title"], l["desc"], [link_button(l.get("button") or "열기", l["url"])]) for l in live_links()]
+    more = [card(m["title"], "[" + m["group"] + "]", [link_button("열기", m["url"])]) for m in more_links()]
+    outs = [carousel("textCard", items)]
+    for i in (0, 10):
+        if more[i:i + 10]:
+            outs.append(carousel("textCard", more[i:i + 10]))
+    return reply(outs)
+
+
+# ---------- 학교 기사 ----------
+
+def news_items():
+    hit = cache.get("news")
+    if hit and time.time() - hit[0] < 1800:
+        return hit[1]
+    try:
+        r = requests.get("https://news.google.com/rss/search",
+                         params={"q": " OR ".join(NEWS_WORDS), "hl": "ko", "gl": "KR", "ceid": "KR:ko"},
+                         headers={"User-Agent": "Mozilla/5.0"}, timeout=4)
+        found, seen = [], set()
+        for it in ET.fromstring(r.content).iter("item"):
+            title = (it.findtext("title") or "").strip()
+            src = (it.findtext("source") or "").strip()
+            if src and title.endswith(" - " + src):
+                title = title[:-len(" - " + src)].strip()
+            url = (it.findtext("link") or "").strip()
+            key = squash(title)
+            if not url or key in seen or not any(squash(w) in key for w in NEWS_WORDS):
+                continue
+            seen.add(key)
+            try:
+                when = parsedate_to_datetime(it.findtext("pubDate")).astimezone(KST)
+            except Exception:
+                when = None
+            found.append({"title": title, "source": src, "url": url, "ts": when.timestamp() if when else 0,
+                          "day": f"{when.year}.{when.month}.{when.day}" if when else ""})
+        found.sort(key=lambda x: -x["ts"])
+        items = [{k: v for k, v in x.items() if k != "ts"} for x in found[:NEWS_COUNT]]
+    except Exception:
+        if hit:
+            return hit[1]
+        raise
+    cache["news"] = (time.time(), items)
+    return items
+
+
+def news():
+    try:
+        items = news_items()
+    except Exception as e:
+        print("[오류] 기사", repr(e))
+        return reply([simple_text("기사를 불러오지 못했어요. 잠시 뒤 다시 물어봐 주세요.")])
+    if not items:
+        return reply([simple_text("최근 학교 기사를 찾지 못했어요.")])
+    cards = [card(n["title"], " · ".join(x for x in (n["source"], n["day"]) if x), [link_button("기사 보기", n["url"])]) for n in items]
+    return reply([simple_text("📰 " + SCHOOL_NAME + " 관련 기사예요."), carousel("textCard", cards)])
 
 
 def one_link(l):
@@ -490,7 +617,7 @@ def home(unknown):
         outs.append(simple_text("무슨 말인지 잘 모르겠어요 😅 아래 버튼을 눌러 보세요."))
     outs.append({"textCard": card(
         SCHOOL_NAME + " 챗봇",
-        "급식, 학사일정, 행사, 동아리, 홍보, 각종 신청 링크를 안내해요.\n'내일 점심', '금요일 급식', '12월 일정'처럼 물어봐도 돼요.",
+        "급식, 학사일정, 학교 기사, 행사, 동아리, 홍보, 각종 신청 링크를 안내해요.\n'내일 점심', '금요일 급식', '12월 일정'처럼 물어봐도 돼요.",
     )})
     return reply(outs)
 
@@ -592,8 +719,18 @@ def api_info():
         "events": ev,
         "promo": [p for p in PROMO if not is_sample(p.get("title", ""))],
         "clubs": [c for c in CLUBS if not is_sample(c.get("name", ""))],
-        "links": [{"title": l["title"], "desc": l["desc"], "url": l["url"]} for l in LINKS],
+        "links": [{"title": l["title"], "desc": l["desc"], "url": l["url"]} for l in live_links()],
+        "more": more_links(),
     })
+
+
+@app.route("/api/news", methods=["GET"])
+def api_news():
+    try:
+        return jsonify({"items": news_items()})
+    except Exception as e:
+        print("[오류] 기사", repr(e))
+        return jsonify({"items": None})
 
 
 @app.route("/manifest.json", methods=["GET"])

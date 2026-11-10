@@ -74,6 +74,11 @@ section h3{font-size:14px; font-weight:700; color:var(--sub); margin:0 4px 8px; 
 footer{margin:34px 4px 0; font-size:12.5px; color:var(--sub); text-align:center}
 a.row:active, button:active{opacity:.7}
 button, a.row{cursor:pointer}
+.grp{font-size:12.5px; font-weight:700; color:var(--accent); margin:14px 4px 6px}
+.grp:first-child{margin-top:0}
+.chips{display:flex; flex-wrap:wrap; gap:8px}
+.chips a{background:var(--card); border:1px solid var(--line); border-radius:999px; padding:8px 14px; font-size:14.5px; color:var(--ink); text-decoration:none}
+.chips a:hover{background:var(--chip)}
 /* 컴퓨터처럼 넓은 화면: 왼쪽에 급식, 오른쪽에 바로가기·일정 */
 @media (min-width: 900px){
   body{padding:36px 32px 56px}
@@ -114,9 +119,11 @@ button, a.row{cursor:pointer}
 
   <section id="s-links" hidden><h3>바로가기</h3><div class="list" id="links"></div></section>
   <section id="s-sched"><h3>학사일정</h3><div class="list" id="sched"><div class="muted">불러오는 중…</div></div></section>
+  <section id="s-news" hidden><h3>학교 기사</h3><div class="list" id="news"></div></section>
   <section id="s-events" hidden><h3>행사</h3><div class="list" id="events"></div></section>
   <section id="s-promo" hidden><h3>소식</h3><div class="list" id="promo"></div></section>
   <section id="s-clubs" hidden><h3>동아리</h3><div class="list" id="clubs"></div></section>
+  <section id="s-more" hidden><h3>링크 모음</h3><div id="more"></div></section>
   </div>
   </div>
 
@@ -222,6 +229,16 @@ button, a.row{cursor:pointer}
       fill("s-events", "events", d.events, function(x){ return {date:x.day, title:x.title, desc:x.desc, url:x.url, side:x.dday}; });
       fill("s-promo", "promo", d.promo, function(x){ return {title:x.title, desc:x.desc, url:x.url, image:x.image}; });
       fill("s-clubs", "clubs", d.clubs, function(x){ return {tag:x.category, title:x.name, desc:x.desc, url:x.url}; });
+      var mo = $("more"), groups = {}, order = [];
+      mo.textContent = "";
+      (d.more || []).forEach(function(x){ if (!groups[x.group]){ groups[x.group] = []; order.push(x.group); } groups[x.group].push(x); });
+      order.forEach(function(g){
+        mo.appendChild(el("div", "grp", g));
+        var c = el("div", "chips");
+        groups[g].forEach(function(x){ var a = el("a", "", x.title); a.href = x.url; a.target = "_blank"; a.rel = "noopener"; c.appendChild(a); });
+        mo.appendChild(c);
+      });
+      $("s-more").hidden = !order.length;
       var sc = $("sched"); sc.textContent = "";
       if (d.schedule === null) sc.appendChild(el("div", "muted", "학사일정을 불러오지 못했어요."));
       else if (!d.schedule.length) sc.appendChild(el("div", "muted", "앞으로 " + d.days + "일 동안 등록된 일정이 없어요."));
@@ -232,12 +249,18 @@ button, a.row{cursor:pointer}
     });
   }
 
+  function loadNews(){
+    return getJSON("/api/news").then(function(d){
+      fill("s-news", "news", d.items, function(x){ return {title:x.title, desc:[x.source, x.day].filter(Boolean).join(" · "), url:x.url}; });
+    }).catch(function(){ $("s-news").hidden = true; });
+  }
+
   function clock(){
     var n = new Date();
     $("clock").textContent = (n.getMonth() + 1) + "월 " + n.getDate() + "일 " + "일월화수목금토"[n.getDay()] + "요일";
   }
 
-  clock(); loadMeal(""); loadInfo();
+  clock(); loadMeal(""); loadInfo(); loadNews();
   // 앱을 다시 열면(다른 앱 갔다 오면) 지금 시간에 맞는 급식으로 새로 고침
   document.addEventListener("visibilitychange", function(){
     if (!document.hidden){ clock(); if (!state.manual) loadMeal(""); loadInfo(); }
