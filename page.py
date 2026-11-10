@@ -74,6 +74,15 @@ a.row:hover .t, .links a:hover{text-decoration:underline}
 .links{display:grid; grid-template-columns:1fr 1fr; column-gap:14px}
 .links a{position:relative; padding:4px 0 4px 18px; font-size:16px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .links a:before{content:""; position:absolute; left:2px; top:15px; width:5px; height:5px; background:#333}
+.conn b{display:block; font-size:18px}
+.conn p{margin:2px 0 8px; font-size:14.5px; color:#555}
+.copy{display:flex; gap:6px; margin-bottom:10px}
+.copy input{flex:1; min-width:0; border:1px solid #999; padding:7px 9px; font:14px/1.3 Consolas,Menlo,monospace; color:#222; background:#f6f6f6}
+.copy button{background:#6a5f53; color:#fff; border:0; padding:0 14px; font-size:14.5px; font-weight:700; white-space:nowrap}
+.conn .how{font-size:14.5px; color:#333; padding-left:18px; position:relative; margin:3px 0}
+.conn .how:before{content:""; position:absolute; left:2px; top:10px; width:5px; height:5px; background:#333}
+.conn .ex{font-size:14px; color:#555; margin:8px 0 0}
+.conn .note{font-size:14px; color:#b3261e; margin:8px 0 0}
 footer{padding:18px 16px 0; font-size:12.5px; color:#777; line-height:1.7}
 footer a{text-decoration:underline}
 
@@ -93,7 +102,7 @@ footer a{text-decoration:underline}
 <body>
 <div class="top"><div class="wrap"><b>__SCHOOL__</b><small>ULSAN SCIENCE HIGH SCHOOL</small></div></div>
 <div class="bar"><div class="wrap">
-  <nav><a href="#meal">급식</a><a href="#s-links">바로가기</a><a href="#s-sched">일정</a><a href="#s-news">기사</a><a href="#s-more">링크</a></nav>
+  <nav><a href="#meal">급식</a><a href="#s-links">바로가기</a><a href="#s-sched">일정</a><a href="#s-news">기사</a><a href="#s-conn">AI</a><a href="#s-more">링크</a></nav>
   <span id="clock"></span>
 </div></div>
 
@@ -117,6 +126,7 @@ footer a{text-decoration:underline}
     <section id="s-promo" hidden><div class="shead"><h3>소식</h3></div><div id="promo"></div></section>
     <section id="s-clubs" hidden><div class="shead"><h3>동아리</h3></div><div id="clubs"></div></section>
   </div>
+  <section id="s-conn" class="wide" hidden><div class="shead"><h3><i>AI</i> 커넥터</h3></div><div id="conn"></div></section>
   <section id="s-more" class="wide" hidden><div class="shead"><h3>링크 모음</h3></div><div id="more"></div></section>
   <footer>학생들이 편하게 쓰도록 만든 안내 페이지이며, 학교 공식 홈페이지가 아닙니다.<br>급식·학사일정: 나이스 교육정보 개방 포털 · 기사: 구글 뉴스</footer>
 </div>
@@ -232,6 +242,26 @@ footer a{text-decoration:underline}
         mo.appendChild(c);
       });
       $("s-more").hidden = !order.length;
+      var cn = $("conn"); cn.textContent = "";
+      (d.connectors || []).forEach(function(c){
+        var box = el("div", "conn");
+        box.appendChild(el("b", "", c.title));
+        box.appendChild(el("p", "", c.desc + " 아래 주소는 사이트가 아니라 AI 설정에 붙여 넣는 주소예요."));
+        var cp = el("div", "copy"), inp = el("input"), bt = el("button", "", "주소 복사");
+        inp.readOnly = true; inp.value = c.url; inp.setAttribute("aria-label", c.title + " 커넥터 주소");
+        inp.onfocus = function(){ inp.select(); };
+        bt.onclick = function(){
+          var done = function(){ bt.textContent = "복사됨"; setTimeout(function(){ bt.textContent = "주소 복사"; }, 1500); };
+          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(c.url).then(done, function(){ inp.select(); });
+          else { inp.select(); try { document.execCommand("copy"); done(); } catch (e) {} }
+        };
+        cp.appendChild(inp); cp.appendChild(bt); box.appendChild(cp);
+        (c.how || []).forEach(function(h){ box.appendChild(el("div", "how", h)); });
+        if (c.examples && c.examples.length) box.appendChild(el("div", "ex", "이렇게 물어보세요: " + c.examples.join(" / ")));
+        if (c.note) box.appendChild(el("div", "note", c.note));
+        cn.appendChild(box);
+      });
+      $("s-conn").hidden = !(d.connectors || []).length;
       var sc = $("sched"); sc.textContent = "";
       if (d.schedule === null) sc.appendChild(el("div", "muted", "학사일정을 불러오지 못했어요."));
       else if (!d.schedule.length) sc.appendChild(el("div", "muted", "앞으로 " + d.days + "일 동안 등록된 일정이 없어요."));

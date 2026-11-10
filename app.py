@@ -89,6 +89,16 @@ LINKS = [
 # 3-1. 링크 모음 (앱 맨 아래 "링크 모음"과 챗봇 "링크 모음"에 나옴)
 #    group 이 같은 것끼리 묶여 나옴. 한 줄 추가하면 바로 늘어남. "학교 홈페이지"는 나이스에서 자동으로 찾아 넣음
 MORE_LINKS = [
+    {"group": "AI", "title": "베이즈 AI (BAZE)", "url": "https://baze.co/"},
+    {"group": "AI", "title": "ChatGPT", "url": "https://chatgpt.com"},
+    {"group": "AI", "title": "Claude", "url": "https://claude.ai"},
+    {"group": "AI", "title": "Gemini", "url": "https://gemini.google.com"},
+    {"group": "AI", "title": "Perplexity", "url": "https://www.perplexity.ai"},
+    {"group": "AI", "title": "Copilot", "url": "https://copilot.microsoft.com"},
+    {"group": "AI", "title": "NotebookLM", "url": "https://notebooklm.google.com"},
+    {"group": "AI", "title": "뤼튼", "url": "https://wrtn.ai"},
+    {"group": "AI", "title": "클로바X", "url": "https://clova-x.naver.com"},
+    {"group": "AI", "title": "DeepL 번역", "url": "https://www.deepl.com"},
     {"group": "학교·행정", "title": "나이스플러스", "url": "https://www.neisplus.kr"},
     {"group": "학교·행정", "title": "나이스 대국민서비스", "url": "https://www.neis.go.kr"},
     {"group": "학교·행정", "title": "울산광역시교육청", "url": "https://www.use.go.kr"},
@@ -113,6 +123,21 @@ MORE_LINKS = [
     {"group": "도구", "title": "PhET 시뮬레이션", "url": "https://phet.colorado.edu/ko/"},
     {"group": "도구", "title": "백준", "url": "https://www.acmicpc.net"},
     {"group": "도구", "title": "기상청 날씨누리", "url": "https://www.weather.go.kr"},
+]
+
+# 3-3. AI 커넥터 (Claude·ChatGPT 같은 AI에 연결해서 쓰는 도구. 주소를 눌러 들어가는 사이트가 아니라, AI 설정에 붙여 넣는 주소)
+CONNECTORS = [
+    {
+        "title": "울곽 시약 검색",
+        "desc": "학교에 있는 시약의 위치, 시약장별 목록, MSDS를 AI에게 물어볼 수 있어요.",
+        "url": "https://ushs-lab-mcp.vercel.app/mcp",
+        "how": [
+            "Claude: 왼쪽 아래 프로필 → 설정 → 커넥터 → + 버튼 → 사용자 지정 커넥터 추가 → 이름을 적고 주소 칸에 위 주소를 붙여 넣기",
+            "ChatGPT(유료 계정): 설정 → 앱 및 커넥터 → 고급 설정에서 개발자 모드 켜기 → 만들기 → 위 주소 붙여 넣고 인증은 '없음'",
+        ],
+        "examples": ["질산은, 아세트산 어디 있어?", "자료실-8에 뭐가 들어 있어?", "벤젠 MSDS 보여줘. 보호구 뭐 써야 해?"],
+        "note": "MSDS는 참고 자료예요. 용기 라벨의 CAS번호가 화면의 번호와 같은지 꼭 대조하세요. AI 답변은 틀릴 수 있고 목록에 빠진 시약이 있을 수 있어요.",
+    },
 ]
 
 # 3-2. 학교 기사 (구글 뉴스에서 아래 낱말로 검색해 제목에 그 낱말이 들어간 기사만 보여 줌)
@@ -284,6 +309,8 @@ BLOCKS = {
     "홍보": "promo",
     "링크 모음": "links",
     "학교 기사": "news",
+    "AI 사이트": "ai",
+    "시약 검색": "conn",
     "학교 위치알리미": "link:학교 위치알리미",
     "현장체험학습 신청서": "link:나이스 학부모서비스",
     "나이스 학부모서비스": "link:나이스 학부모서비스",
@@ -301,6 +328,10 @@ def by_words(utter):
             return "link:" + l["title"]
     if re.search(r"기사|뉴스|신문|보도", u):
         return "news"
+    if re.search(r"시약|커넥터|mcp|msds", u, re.I):
+        return "conn"
+    if re.search(r"(?<![a-z])ai(?![a-z])|인공지능|gpt|지피티|제미나이|클로드|베이즈", u, re.I):
+        return "ai"
     if re.search(r"급식|식단|밥|조식|중식|석식|아침|점심|저녁", u):
         return "meal"
     if "동아리" in u:
@@ -326,6 +357,10 @@ def handle(utter, block=""):
                 return one_link(l)
     if what == "news":
         return news()
+    if what == "conn":
+        return connectors()
+    if what == "ai":
+        return ai_links()
     if what == "meal":
         return meal(utter)
     if what == "schedule":
@@ -550,6 +585,21 @@ def all_links():
     return reply(outs)
 
 
+def ai_links():
+    items = [card(m["title"], "AI 사이트", [link_button("열기", m["url"])]) for m in MORE_LINKS if m.get("group") == "AI" and m.get("url")]
+    return reply([simple_text("🤖 자주 쓰는 AI 사이트예요."), carousel("textCard", items)])
+
+
+def connectors():
+    outs = []
+    for c in CONNECTORS[:3]:
+        text = "🧪 " + c["title"] + " (AI 커넥터)\n" + c["desc"] + "\n\n주소: " + c["url"] + "\n\n" + "\n".join("· " + h for h in c.get("how", []))
+        if c.get("note"):
+            text += "\n\n⚠ " + c["note"]
+        outs.append(simple_text(text))
+    return reply(outs or [simple_text("등록된 커넥터가 없어요.")])
+
+
 # ---------- 학교 기사 ----------
 
 def news_items():
@@ -715,6 +765,7 @@ def api_info():
         "clubs": [c for c in CLUBS if not is_sample(c.get("name", ""))],
         "links": [{"title": l["title"], "desc": l["desc"], "url": l["url"]} for l in live_links()],
         "more": more_links(),
+        "connectors": CONNECTORS,
     })
 
 
