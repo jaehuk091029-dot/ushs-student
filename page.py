@@ -8,8 +8,8 @@ PAGE = r"""<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>__SCHOOL__</title>
 <link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" href="/icon.png">
-<link rel="icon" href="/icon.png">
+<link rel="apple-touch-icon" href="/icon.png?v=2">
+<link rel="icon" href="/icon.png?v=2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="__SHORT__">
@@ -103,7 +103,7 @@ footer a{text-decoration:underline}
 </style>
 </head>
 <body>
-<div class="top"><div class="wrap"><img src="/icon.png" alt=""><span class="nm"><b>__SCHOOL__</b><small>ULSAN SCIENCE HIGH SCHOOL</small></span></div></div>
+<div class="top"><div class="wrap"><img src="/icon.png?v=2" alt=""><span class="nm"><b>__SCHOOL__</b><small>ULSAN SCIENCE HIGH SCHOOL</small></span></div></div>
 <div class="bar"><div class="wrap">
   <nav><a href="#meal">급식</a><a href="#s-links">바로가기</a><a href="#s-sched">일정</a><a href="#s-news">기사</a><a href="#s-conn">AI</a><a href="#s-more">링크</a></nav>
   <span id="clock"></span>

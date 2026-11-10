@@ -782,7 +782,7 @@ def manifest():
     return jsonify({
         "name": SCHOOL_NAME, "short_name": APP_SHORT_NAME, "start_url": "/", "display": "standalone",
         "background_color": "#ffffff", "theme_color": "#e9963c",
-        "icons": [{"src": "/icon.png", "sizes": "192x192", "type": "image/png", "purpose": "any"}],
+        "icons": [{"src": "/icon.png?v=2", "sizes": "192x192", "type": "image/png", "purpose": "any"}],
     })
 
 
