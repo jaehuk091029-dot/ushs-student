@@ -16,6 +16,7 @@ PAGE = r"""<!doctype html>
 <meta name="theme-color" content="#e9963c">
 <style>
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+[hidden]{display:none !important}
 html,body{margin:0; background:#fff; color:#222}
 body{font-family:"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",-apple-system,sans-serif; font-size:16px; line-height:1.5; word-break:keep-all}
 a{color:inherit; text-decoration:none}
@@ -69,7 +70,7 @@ section{padding:22px 16px 18px; border-bottom:1px solid #d9d9d9}
 .row:before{content:""; position:absolute; left:2px; top:16px; width:5px; height:5px; background:#333}
 .row .body2{flex:1; min-width:0}
 .row .t{display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.row .d{display:block; font-size:13.5px; color:#777; white-space:normal}
+.row .d{display:block; font-size:13.5px; color:#777; white-space:pre-line}
 .row .side{font-size:16px; color:#444; white-space:nowrap; font-variant-numeric:tabular-nums}
 .row .tag{color:#b9772a; font-weight:700; margin-right:6px}
 .row img{width:54px; height:54px; object-fit:cover; flex:none; align-self:center}
@@ -385,9 +386,13 @@ footer a{text-decoration:underline}
     $("nmsg").textContent = msg != null ? msg : (sub ? "매일 7시 · 12시 · 18시에 알려 드려요." : "아침 7시 · 점심 12시 · 저녁 6시");
   }
   function initPush(){
-    var ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
+    var ua = navigator.userAgent, ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    var inapp = /KAKAOTALK|NAVER\(|Instagram|FBAN|FBAV|Line\/|DaumApps|everytimeApp|; wv\)/i.test(ua);
+    function cant(msg){ $("noti").hidden = false; $("nbtn").hidden = true; $("ntest").hidden = true; $("nmsg").textContent = msg; }
     if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)){
-      if (ios){ $("noti").hidden = false; $("nbtn").hidden = true; $("nmsg").textContent = "아이폰은 공유 버튼 → '홈 화면에 추가'로 앱을 만든 뒤, 그 앱에서 급식 알림을 켤 수 있어요."; }
+      if (inapp) cant("급식 알림: 카톡 같은 앱 안에서는 켤 수 없어요. 오른쪽 위(또는 아래) 메뉴에서 '다른 브라우저로 열기'를 누른 뒤 켜 주세요.");
+      else if (ios) cant("급식 알림: 아이폰은 사파리에서 공유 버튼 → '홈 화면에 추가'로 앱을 만든 뒤, 그 앱을 열어서 켤 수 있어요.");
+      else cant("급식 알림: 이 브라우저에서는 켤 수 없어요. 크롬이나 삼성 인터넷으로 열어 주세요.");
       return;
     }
     getJSON("/api/push/key").then(function(k){
@@ -400,7 +405,7 @@ footer a{text-decoration:underline}
         if (sub) post("/api/push/subscribe", sub.toJSON()).catch(function(){});   // 서버가 다시 켜졌어도 구독이 살아 있도록 다시 알려 줌
         notiUI(sub);
       });
-    }).catch(function(){});
+    }).catch(function(){ cant("급식 알림을 준비하지 못했어요. 새로 고침한 뒤 다시 확인해 주세요."); });
   }
   $("nbtn").onclick = function(){
     if (!swReg) return;

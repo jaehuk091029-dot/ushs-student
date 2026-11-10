@@ -73,6 +73,7 @@ LINKS = [
         "title": "기상곡 신청",
         "desc": "기상곡을 신청할 수 있어요.",
         "url": "https://onair-three-beta.vercel.app/",
+        "by": "제작: On-Air 시관 관리부 1학년 김무성, 김예영",
         "button": "신청하러 가기",
         "keywords": ["기상곡", "기상송", "기상음악", "노래신청", "노래 신청"],
     },
