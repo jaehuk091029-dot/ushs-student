@@ -71,6 +71,13 @@ NEIS_KEY = os.environ.get("NEIS_KEY", "").strip()
 #    앞에서 3개는 첫 화면 바로가기 버튼에도 나옴
 LINKS = [
     {
+        "title": "게시판",
+        "desc": "동아리 홍보 게시판(포스터 올리기)과 자유 게시판이에요. 학교 구글 계정(@ushs.hs.kr)으로 로그인해야 열려요. 카톡에서 안 열리면 오른쪽 위 메뉴에서 '다른 브라우저로 열기'를 눌러 보세요.",
+        "url": "https://script.google.com/a/macros/ushs.hs.kr/s/AKfycby2gOXvtxIrsN8IEo8oOp2D0up47iO7iImfhoiqHPYY-iCouFVPZY330BDXmFn_7t0A/exec",
+        "button": "게시판 열기",
+        "keywords": ["게시판", "자유게시판", "자유 게시판", "홍보 게시판", "포스터", "글쓰기"],
+    },
+    {
         "title": "기상곡 신청",
         "desc": "기상곡을 신청할 수 있어요.",
         "url": "https://onair-three-beta.vercel.app/",
