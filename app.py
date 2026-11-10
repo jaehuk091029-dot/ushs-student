@@ -23,7 +23,10 @@ GitHub 에서 이 파일을 고치고 저장(Commit)하면 1분쯤 뒤 챗봇에
 """
 
 import base64
+import hashlib
+import json
 import os
+import threading
 import re
 import time
 from datetime import datetime, timedelta
@@ -35,7 +38,16 @@ from email.utils import parsedate_to_datetime
 import requests
 from flask import Flask, request, jsonify
 
-from page import PAGE, ICON_B64
+try:  # 급식 알림(웹 푸시)에 쓰는 도구. 설치가 안 돼 있으면 알림 기능만 꺼짐
+    from cryptography.fernet import Fernet, InvalidToken
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric import ec
+    from pywebpush import webpush, WebPushException
+    PUSH_LIB = True
+except Exception:
+    PUSH_LIB = False
+
+from page import PAGE, ICON_B64, SW
 from mapdata import MAP
 
 # ======================================================================
@@ -68,6 +80,7 @@ LINKS = [
         "title": "화학실·생물실 신청",
         "desc": "화학실과 생물실 사용을 예약해요. 학교 계정으로 로그인해야 해요.",
         "url": "https://ushs-lab.vercel.app/?next=/book",
+        "by": "제작 동아리: ACE, LICHEM, AiBE, LAYOUT",
         "button": "예약하러 가기",
         "keywords": ["화학실", "생물실", "실험실", "실험실 신청", "실험실 예약"],
     },
@@ -76,6 +89,7 @@ LINKS = [
         "desc": "학교 구글 계정(@ushs.hs.kr)으로 로그인해야 열려요. 카톡에서 안 열리면 오른쪽 위 메뉴에서 '다른 브라우저로 열기'를 눌러 보세요.",
         "url": "https://script.google.com/a/macros/ushs.hs.kr/s/AKfycbwBclQ5njll0mmySd74avm2zbHOMqZ4dqKfgveHE897OXVTXLfr7MhkPxKNPkxLkRJSbw/exec",
         "button": "열기",
+        "by": "제작: 이병석 선생님",
         "keywords": ["위치알리미", "위치 알리미", "학교 위치", "위치"],
     },
     {
@@ -131,6 +145,7 @@ CONNECTORS = [
         "title": "울곽 시약 검색",
         "desc": "학교에 있는 시약의 위치, 시약장별 목록, MSDS를 AI에게 물어볼 수 있어요.",
         "url": "https://ushs-lab-mcp.vercel.app/mcp",
+        "by": "MCP 배포: 하성준, 박승준",
         "how": [
             "Claude: 왼쪽 아래 프로필 → 설정 → 커넥터 → + 버튼 → 사용자 지정 커넥터 추가 → 이름을 적고 주소 칸에 위 주소를 붙여 넣기",
             "ChatGPT(유료 계정): 설정 → 앱 및 커넥터 → 고급 설정에서 개발자 모드 켜기 → 만들기 → 위 주소 붙여 넣고 인증은 '없음'",
@@ -138,6 +153,14 @@ CONNECTORS = [
         "examples": ["질산은, 아세트산 어디 있어?", "자료실-8에 뭐가 들어 있어?", "벤젠 MSDS 보여줘. 보호구 뭐 써야 해?"],
         "note": "MSDS는 참고 자료예요. 용기 라벨의 CAS번호가 화면의 번호와 같은지 꼭 대조하세요. AI 답변은 틀릴 수 있고 목록에 빠진 시약이 있을 수 있어요.",
     },
+]
+
+# 3-4. 학교 지도 제작자, 급식 알림 시각
+MAP_BY = "지도 제작: ADEUS"
+PUSH_SLOTS = [  # (급식 코드, 이름, 알림 보내기 시작 시각, 이 시각이 지나면 그 끼니 알림은 안 보냄)
+    ("1", "아침", 7.0, 8.5),
+    ("2", "점심", 12.0, 13.0),
+    ("3", "저녁", 18.0, 19.0),
 ]
 
 # 3-2. 학교 기사 (구글 뉴스에서 아래 낱말로 검색해 제목에 그 낱말이 들어간 기사만 보여 줌)
@@ -639,7 +662,7 @@ def ai_links():
 def connectors():
     outs = []
     for c in CONNECTORS[:3]:
-        text = "🧪 " + c["title"] + " (AI 커넥터)\n" + c["desc"] + "\n\n주소: " + c["url"] + "\n\n" + "\n".join("· " + h for h in c.get("how", []))
+        text = "🧪 " + c["title"] + " (AI 커넥터)\n" + c["desc"] + ("\n" + c["by"] if c.get("by") else "") + "\n\n주소: " + c["url"] + "\n\n" + "\n".join("· " + h for h in c.get("how", []))
         if c.get("note"):
             text += "\n\n⚠ " + c["note"]
         outs.append(simple_text(text))
@@ -696,7 +719,8 @@ def news():
 
 
 def one_link(l):
-    return reply([{"textCard": card(l["title"], l["desc"], [link_button(l.get("button") or "열기", l["url"])])}])
+    desc = l["desc"] + ("\n" + l["by"] if l.get("by") else "")
+    return reply([{"textCard": card(l["title"], desc, [link_button(l.get("button") or "열기", l["url"])])}])
 
 
 # ---------- 첫 화면 ----------
@@ -809,10 +833,183 @@ def api_info():
         "events": ev,
         "promo": [p for p in PROMO if not is_sample(p.get("title", ""))],
         "clubs": [c for c in CLUBS if not is_sample(c.get("name", ""))],
-        "links": [{"title": l["title"], "desc": l["desc"], "url": l["url"]} for l in live_links()],
+        "links": [{"title": l["title"], "desc": l["desc"], "url": l["url"], "by": l.get("by", "")} for l in live_links()],
+        "mapBy": MAP_BY,
         "more": more_links(),
         "connectors": CONNECTORS,
     })
+
+
+# ---------- 급식 알림 (웹 푸시) ----------
+# 구독 정보는 서버 메모리에 두고, GitHub Actions 가 10분마다 암호화된 묶음으로 받아 저장소(push-data 가지)에 보관함.
+# 서버가 다시 켜지면 Actions 가 그 묶음을 돌려줘서 복구함. 알림 열쇠는 NEIS_KEY 에서 만들어 따로 넣을 것이 없음.
+
+SUBS = {}        # endpoint -> 구독 정보
+SENT = {}        # "날짜-끼니" -> True (같은 알림을 두 번 보내지 않기 위함)
+LAST_BLOB = {"hash": "", "text": ""}
+PUSH_LOCK = threading.Lock()
+PUSH_HOSTS = ("fcm.googleapis.com", ".push.services.mozilla.com", ".notify.windows.com", ".push.apple.com")
+
+
+def push_on():
+    return PUSH_LIB and bool(NEIS_KEY)
+
+
+def push_secret(tag):
+    return hashlib.sha256((tag + ":" + NEIS_KEY).encode()).digest()
+
+
+def vapid_keys():
+    n = int.from_bytes(push_secret("vapid"), "big") % (2 ** 255) + 1
+    key = ec.derive_private_key(n, ec.SECP256R1())
+    raw = base64.urlsafe_b64encode(n.to_bytes(32, "big")).decode().rstrip("=")
+    pub = key.public_key().public_bytes(serialization.Encoding.X962, serialization.PublicFormat.UncompressedPoint)
+    return raw, base64.urlsafe_b64encode(pub).decode().rstrip("=")
+
+
+def fernet():
+    return Fernet(base64.urlsafe_b64encode(push_secret("blob")))
+
+
+def valid_sub(s):
+    try:
+        ep = s["endpoint"]
+        host = ep.split("/")[2]
+        ok_host = any(host == h or host.endswith(h) for h in PUSH_HOSTS)
+        return ep.startswith("https://") and ok_host and len(ep) < 1000 and len(s["keys"]["p256dh"]) < 200 and len(s["keys"]["auth"]) < 100
+    except Exception:
+        return False
+
+
+def clean_sub(s):
+    return {"endpoint": s["endpoint"], "keys": {"p256dh": s["keys"]["p256dh"], "auth": s["keys"]["auth"]}}
+
+
+def push_state():
+    day = today().strftime("%Y%m%d")
+    for k in [k for k in SENT if not k.startswith(day)]:
+        del SENT[k]
+    return json.dumps({"subs": [SUBS[k] for k in sorted(SUBS)], "sent": sorted(SENT)}, sort_keys=True, separators=(",", ":"))
+
+
+def send_push(sub, payload):
+    priv, _ = vapid_keys()
+    try:
+        webpush(clean_sub(sub), json.dumps(payload, ensure_ascii=False).encode("utf-8"), vapid_private_key=priv,
+                vapid_claims={"sub": "https://" + sub.get("_host", "ushs-student.onrender.com")}, ttl=3600, timeout=8)
+        return True
+    except WebPushException as e:
+        code = getattr(getattr(e, "response", None), "status_code", 0)
+        if code in (404, 410):
+            SUBS.pop(sub["endpoint"], None)   # 브라우저에서 알림을 끈 구독은 지움
+        print("[알림] 실패", code)
+    except Exception as e:
+        print("[알림] 실패", repr(e))
+    return False
+
+
+def send_all(payload, host):
+    n = 0
+    for sub in list(SUBS.values()):
+        n += send_push(dict(sub, _host=host), payload)
+    print("[알림] 보냄", n, "/", len(SUBS))
+
+
+@app.route("/sw.js", methods=["GET"])
+def sw():
+    return SW, 200, {"Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-cache"}
+
+
+@app.route("/api/push/key", methods=["GET"])
+def push_key():
+    if not push_on():
+        return jsonify({"on": False})
+    return jsonify({"on": True, "key": vapid_keys()[1], "slots": [[s[1], s[2]] for s in PUSH_SLOTS]})
+
+
+@app.route("/api/push/subscribe", methods=["POST"])
+def push_subscribe():
+    s = request.get_json(silent=True) or {}
+    if not push_on() or not valid_sub(s) or (len(SUBS) >= 3000 and s["endpoint"] not in SUBS):
+        return jsonify({"ok": False}), 400
+    SUBS[s["endpoint"]] = clean_sub(s)
+    return jsonify({"ok": True})
+
+
+@app.route("/api/push/unsubscribe", methods=["POST"])
+def push_unsubscribe():
+    s = request.get_json(silent=True) or {}
+    SUBS.pop(s.get("endpoint", ""), None)
+    return jsonify({"ok": True})
+
+
+@app.route("/api/push/test", methods=["POST"])
+def push_test():
+    s = request.get_json(silent=True) or {}
+    sub = SUBS.get(s.get("endpoint", ""))
+    if not push_on() or not sub:
+        return jsonify({"ok": False}), 400
+    ok = send_push(dict(sub, _host=request.host), {"title": "급식 알림이 켜졌어요", "body": "매일 아침 7시, 점심 12시, 저녁 6시에 급식을 알려 드릴게요.", "tag": "test", "url": "/"})
+    return jsonify({"ok": ok})
+
+
+@app.route("/api/push/blob", methods=["GET"])
+def push_blob():
+    if not push_on():
+        return "", 200, {"Content-Type": "text/plain"}
+    with PUSH_LOCK:
+        state = push_state()
+        if not SUBS and not SENT:
+            return "", 200, {"Content-Type": "text/plain"}
+        h = hashlib.sha256(state.encode()).hexdigest()[:16]
+        if LAST_BLOB["hash"] != h:
+            LAST_BLOB["hash"] = h
+            LAST_BLOB["text"] = h + "\n" + fernet().encrypt(state.encode()).decode() + "\n"
+        return LAST_BLOB["text"], 200, {"Content-Type": "text/plain", "Cache-Control": "no-store"}
+
+
+@app.route("/api/push/restore", methods=["POST"])
+def push_restore():
+    if not push_on():
+        return jsonify({"ok": False}), 400
+    try:
+        lines = request.get_data(as_text=True).strip().split("\n")
+        data = json.loads(fernet().decrypt(lines[-1].encode()).decode())
+    except (InvalidToken, ValueError, IndexError):
+        return jsonify({"ok": False}), 400
+    with PUSH_LOCK:
+        for s in data.get("subs", []):
+            if valid_sub(s) and len(SUBS) < 3000:
+                SUBS.setdefault(s["endpoint"], clean_sub(s))
+        for k in data.get("sent", []):
+            SENT[str(k)] = True
+    return jsonify({"ok": True, "subs": len(SUBS)})
+
+
+@app.route("/cron/meal-push", methods=["GET"])
+def cron_meal_push():
+    if not push_on():
+        return jsonify({"ok": False})
+    now = datetime.now(KST)
+    h = now.hour + now.minute / 60
+    slot = next((s for s in PUSH_SLOTS if s[2] <= h < s[3]), None)
+    if not slot:
+        return jsonify({"ok": True, "sent": 0, "why": "알림 시간이 아님"})
+    key = now.strftime("%Y%m%d") + "-" + slot[0]
+    with PUSH_LOCK:
+        if SENT.get(key):
+            return jsonify({"ok": True, "sent": 0, "why": "이미 보냄"})
+        try:
+            rows = neis("mealServiceDietInfo", {"MLSV_YMD": now.strftime("%Y%m%d"), "MMEAL_SC_CODE": slot[0]})
+        except Exception as e:
+            print("[알림] 급식 조회 실패", repr(e))
+            return jsonify({"ok": False, "why": "급식 조회 실패"})
+        SENT[key] = True
+    if not rows or not SUBS:
+        return jsonify({"ok": True, "sent": 0, "why": "급식 없음" if not rows else "구독자 없음"})
+    payload = {"title": "오늘 " + slot[1] + " 급식", "body": ", ".join(menu_items(rows[0].get("DDISH_NM"))), "tag": "meal-" + key, "url": "/"}
+    threading.Thread(target=send_all, args=(payload, request.host), daemon=True).start()
+    return jsonify({"ok": True, "sent": len(SUBS)})
 
 
 @app.route("/api/map", methods=["GET"])
