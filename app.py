@@ -36,6 +36,7 @@ import requests
 from flask import Flask, request, jsonify
 
 from page import PAGE, ICON_B64
+from mapdata import MAP
 
 # ======================================================================
 # 설정
@@ -310,6 +311,7 @@ BLOCKS = {
     "학교 기사": "news",
     "AI 사이트": "ai",
     "시약 검색": "conn",
+    "학교 지도": "map",
     "학교 위치알리미": "link:학교 위치알리미",
     "현장체험학습 신청서": "link:나이스 학부모서비스",
     "나이스 학부모서비스": "link:나이스 학부모서비스",
@@ -343,6 +345,11 @@ def by_words(utter):
         return "schedule"
     if re.search(r"링크|바로가기", u):
         return "links"
+    for name in sorted(ROOMS, key=len, reverse=True):
+        if name in u.lower():
+            return "room:" + name
+    if re.search(r"지도|약도|몇층|어디", u):
+        return "map"
     if re.search(r"메뉴|처음|도움|시작|안녕|하이", u):
         return "home"
     return ""
@@ -358,6 +365,10 @@ def handle(utter, block=""):
         return news()
     if what == "conn":
         return connectors()
+    if what.startswith("room:"):
+        return room(what[5:])
+    if what == "map":
+        return school_map()
     if what == "ai":
         return ai_links()
     if what == "meal":
@@ -584,6 +595,42 @@ def all_links():
     return reply(outs)
 
 
+# ---------- 학교 지도 ----------
+
+def room_names():
+    rooms = {}
+    for f in MAP:
+        for t in f["t"]:
+            name = t[3].replace("|", " ")
+            rooms.setdefault(squash(name).lower(), [name, []])[1].append(f["n"][0])
+    return rooms
+
+
+ROOMS = room_names()
+
+
+def map_button():
+    return [link_button("지도 보기", request.host_url.replace("http://", "https://") + "#s-map")]
+
+
+def room(key):
+    name, fl = ROOMS[key]
+    where = ", ".join(sorted(set(fl))) + "층"
+    return reply([{"textCard": card("📍 " + name, name + "은(는) " + where + "에 있어요.", map_button())}])
+
+
+def school_map():
+    lines = []
+    for f in MAP:
+        names = []
+        for t in f["t"]:
+            n = t[3].replace("|", " ")
+            if n not in names:
+                names.append(n)
+        lines.append(f["n"][0] + "층: " + ", ".join(names))
+    return reply([simple_text("🗺 학교 지도\n\n" + "\n\n".join(lines)), {"textCard": card("층별 지도", "앱에서 층별 지도를 볼 수 있어요.", map_button())}])
+
+
 def ai_links():
     items = [card(m["title"], "AI 사이트", [link_button("열기", m["url"])]) for m in MORE_LINKS if m.get("group") == "AI" and m.get("url")]
     return reply([simple_text("🤖 자주 쓰는 AI 사이트예요."), carousel("textCard", items)])
@@ -766,6 +813,11 @@ def api_info():
         "more": more_links(),
         "connectors": CONNECTORS,
     })
+
+
+@app.route("/api/map", methods=["GET"])
+def api_map():
+    return jsonify(MAP), 200, {"Cache-Control": "public, max-age=3600"}
 
 
 @app.route("/api/news", methods=["GET"])

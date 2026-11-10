@@ -76,6 +76,30 @@ a.row:hover .t, .links a:hover{text-decoration:underline}
 .links{display:grid; grid-template-columns:1fr 1fr; column-gap:14px}
 .links a{position:relative; padding:4px 0 4px 18px; font-size:16px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .links a:before{content:""; position:absolute; left:2px; top:15px; width:5px; height:5px; background:#333}
+.fav{width:18px; height:18px; flex:none; align-self:center; object-fit:contain}
+.row.hasfav{padding-left:0}
+.row.hasfav:before{display:none}
+.links a.hasfav{padding-left:0; display:flex; align-items:center; gap:8px}
+.links a.hasfav:before{display:none}
+.links a.hasfav span{overflow:hidden; text-overflow:ellipsis}
+.find{background:#f3f1ee; border-bottom:1px solid #d9d9d9}
+.find .wrap{padding:10px 16px}
+.find input{width:100%; border:1px solid #8a8076; padding:9px 11px; font:inherit; font-size:16px; background:#fff; color:#222; border-radius:0; -webkit-appearance:none}
+#hits{margin-top:6px; background:#fff; border:1px solid #c9c4be; max-height:60vh; overflow:auto}
+#hits .row{padding:8px 10px 8px 26px; border-bottom:1px solid #eee; cursor:pointer}
+#hits .row:before{left:11px; top:19px}
+#hits .row:last-child{border-bottom:0}
+#hits .muted{padding:8px 10px}
+.ftabs{display:flex; gap:6px; margin-bottom:10px}
+.ftabs button{flex:1; max-width:90px; background:#fff; color:#333; border:1px solid #4a4138; padding:7px 0; font-size:15px; font-weight:800}
+.ftabs button[aria-selected="true"]{background:#2b2520; color:#fff}
+#mapbox{border:1px solid #d9d9d9; background:#fff; max-width:760px}
+#mapbox svg{display:block; width:100%; height:auto}
+#mapbox text{font-family:inherit; font-weight:700; fill:#222; text-anchor:middle}
+#mapbox text.hit{fill:#d6007f}
+.legend{display:flex; flex-wrap:wrap; gap:6px 16px; font-size:13.5px; color:#444; margin-top:8px; align-items:center}
+.legend span{display:inline-flex; align-items:center; gap:5px}
+.legend svg{width:18px; height:18px}
 .conn b{display:block; font-size:18px}
 .conn p{margin:2px 0 8px; font-size:14.5px; color:#555}
 .copy{display:flex; gap:6px; margin-bottom:10px}
@@ -105,8 +129,13 @@ footer a{text-decoration:underline}
 <body>
 <div class="top"><div class="wrap"><img src="/icon.png?v=2" alt=""><span class="nm"><b>__SCHOOL__</b><small>ULSAN SCIENCE HIGH SCHOOL</small></span></div></div>
 <div class="bar"><div class="wrap">
-  <nav><a href="#meal">급식</a><a href="#s-links">바로가기</a><a href="#s-sched">일정</a><a href="#s-news">기사</a><a href="#s-conn">AI</a><a href="#s-more">링크</a></nav>
+  <nav><a href="#meal">급식</a><a href="#s-links">바로가기</a><a href="#s-sched">일정</a><a href="#s-news">기사</a><a href="#s-map">지도</a><a href="#s-conn">AI</a><a href="#s-more">링크</a></nav>
   <span id="clock"></span>
+</div></div>
+
+<div class="find"><div class="wrap">
+  <input id="q" type="search" placeholder="검색: 교실 이름, 링크, 일정, 기사" autocomplete="off" aria-label="검색">
+  <div id="hits" hidden></div>
 </div></div>
 
 <div class="meal" id="meal"><div class="wrap" aria-live="polite">
@@ -129,6 +158,17 @@ footer a{text-decoration:underline}
     <section id="s-promo" hidden><div class="shead"><h3>소식</h3></div><div id="promo"></div></section>
     <section id="s-clubs" hidden><div class="shead"><h3>동아리</h3></div><div id="clubs"></div></section>
   </div>
+  <section id="s-map" class="wide" hidden><div class="shead"><h3><i>학교</i> 지도</h3></div>
+    <div class="ftabs" id="ftabs" role="tablist"></div>
+    <div id="mapbox"></div>
+    <div class="legend">
+      <span><svg viewBox="0 0 18 18"><rect x="3" y="1" width="12" height="16" fill="#2f6fe4"/></svg>남자화장실</span>
+      <span><svg viewBox="0 0 18 18"><rect x="3" y="1" width="12" height="16" fill="#e0443c"/></svg>여자화장실</span>
+      <span><svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="7" fill="#fff" stroke="#222" stroke-width="2"/><circle cx="9" cy="9" r="2.5" fill="#222"/></svg>승강기</span>
+      <span><svg viewBox="0 0 18 18"><path d="M2 15h4v-4h4V7h4V3h2" fill="none" stroke="#222" stroke-width="2"/></svg>계단</span>
+      <span>지도 제작: ADEU</span>
+    </div>
+  </section>
   <section id="s-conn" class="wide" hidden><div class="shead"><h3><i>AI</i> 커넥터</h3></div><div id="conn"></div></section>
   <section id="s-more" class="wide" hidden><div class="shead"><h3>링크 모음</h3></div><div id="more"></div></section>
   <footer>학생들이 편하게 쓰도록 만든 안내 페이지이며, 학교 공식 홈페이지가 아닙니다.<br>급식·학사일정: 나이스 교육정보 개방 포털 · 기사: 구글 뉴스</footer>
@@ -204,9 +244,18 @@ footer a{text-decoration:underline}
   $("today").onclick = function(){ loadMeal(""); };
 
   // ----- 아래 목록들 -----
+  function fav(url){
+    var i = el("img", "fav"), host = "";
+    try { host = new URL(url).hostname; } catch (e) {}
+    i.alt = ""; i.loading = "lazy"; i.referrerPolicy = "no-referrer";
+    i.onerror = function(){ i.style.visibility = "hidden"; };
+    i.src = "https://www.google.com/s2/favicons?sz=64&domain=" + encodeURIComponent(host);
+    return i;
+  }
   function row(o){
     var r = el(o.url ? "a" : "div", "row");
     if (o.url){ r.href = o.url; r.target = "_blank"; r.rel = "noopener"; }
+    if (o.fav && o.url){ r.classList.add("hasfav"); r.appendChild(fav(o.url)); }
     if (o.image){ var i = el("img"); i.src = o.image; i.alt = ""; i.loading = "lazy"; r.appendChild(i); }
     var b = el("span", "body2");
     var t = el("span", "t");
@@ -227,7 +276,8 @@ footer a{text-decoration:underline}
   }
   function loadInfo(){
     return getJSON("/api/info").then(function(d){
-      fill("s-links", "links", d.links, function(x){ return {title:x.title, desc:x.desc, url:x.url}; });
+      fill("s-links", "links", d.links, function(x){ return {title:x.title, desc:x.desc, url:x.url, fav:true}; });
+      INFO = d; 
       fill("s-events", "events", d.events, function(x){ return {title:x.title, desc:x.desc, url:x.url, side:x.day}; });
       fill("s-promo", "promo", d.promo, function(x){ return {title:x.title, desc:x.desc, url:x.url, image:x.image}; });
       fill("s-clubs", "clubs", d.clubs, function(x){ return {tag:x.category, title:x.name, desc:x.desc, url:x.url}; });
@@ -241,7 +291,7 @@ footer a{text-decoration:underline}
       order.forEach(function(g){
         mo.appendChild(el("div", "grp", g));
         var c = el("div", "links");
-        groups[g].forEach(function(x){ var a = el("a", "", x.title); a.href = x.url; a.target = "_blank"; a.rel = "noopener"; c.appendChild(a); });
+        groups[g].forEach(function(x){ var a = el("a", "hasfav"); a.href = x.url; a.target = "_blank"; a.rel = "noopener"; a.appendChild(fav(x.url)); a.appendChild(el("span", "", x.title)); c.appendChild(a); });
         mo.appendChild(c);
       });
       $("s-more").hidden = !order.length;
@@ -276,16 +326,92 @@ footer a{text-decoration:underline}
   }
   function loadNews(){
     return getJSON("/api/news").then(function(d){
+      NEWS = d.items || [];
       fill("s-news", "news", d.items, function(x){ return {title:x.title, desc:x.source, url:x.url, side:(x.day || "").slice(2)}; });
     }).catch(function(){ $("s-news").hidden = true; });
   }
+
+  // ----- 학교 지도 -----
+  var NS = "http://www.w3.org/2000/svg", MAP = [], INFO = {}, NEWS = [], floorNow = 0, hitRoom = "";
+  function sv(tag, at){ var e = document.createElementNS(NS, tag); for (var k in at) e.setAttribute(k, at[k]); return e; }
+  function norm(s){ return (s || "").toLowerCase().replace(/\s+/g, ""); }
+  function drawMap(){
+    var f = MAP[floorNow], box = $("mapbox"); if (!f) return;
+    box.textContent = "";
+    var s = sv("svg", {viewBox: "0 0 " + f.w + " " + f.h, role: "img", "aria-label": f.n + " 지도"});
+    f.p.forEach(function(p){ s.appendChild(sv("polygon", {points: p.join(" "), fill: "#fdf3f8", stroke: "#6a5f53", "stroke-width": 2.5, "stroke-linejoin": "round"})); });
+    f.s.forEach(function(g){ s.appendChild(sv("line", {x1: g[0], y1: g[1], x2: g[2], y2: g[3], stroke: "#bfb3ba", "stroke-width": 2})); });
+    f.i.forEach(function(i){
+      var x = i[1], y = i[2];
+      if (i[0] === "m" || i[0] === "f") s.appendChild(sv("rect", {x: x - 9, y: y - 13, width: 18, height: 26, fill: i[0] === "m" ? "#2f6fe4" : "#e0443c"}));
+      else if (i[0] === "e"){ s.appendChild(sv("circle", {cx: x, cy: y, r: 9, fill: "#fff", stroke: "#222", "stroke-width": 2.5})); s.appendChild(sv("circle", {cx: x, cy: y, r: 3, fill: "#222"})); }
+      else s.appendChild(sv("path", {d: "M" + (x - 11) + " " + (y + 9) + "h6v-6h6v-6h6v-6h4", fill: "none", stroke: "#222", "stroke-width": 2.5}));
+    });
+    f.t.forEach(function(t){
+      var lines = t[3].split("|"), big = t[2] > 25, fs = big ? 30 : 15, lh = fs * 1.15;
+      var hit = hitRoom && norm(t[3].replace(/\|/g, "")) === hitRoom;
+      if (hit) s.appendChild(sv("circle", {cx: t[0], cy: t[1], r: big ? 70 : 46, fill: "#ffe3f3", stroke: "#d6007f", "stroke-width": 3}));
+      var tx = sv("text", {x: t[0], y: t[1] - (lines.length - 1) * lh / 2 + fs * 0.36, "font-size": fs});
+      if (hit) tx.setAttribute("class", "hit");
+      lines.forEach(function(l, k){ var sp = sv("tspan", {x: t[0]}); if (k) sp.setAttribute("dy", lh); sp.textContent = l; tx.appendChild(sp); });
+      s.appendChild(tx);
+    });
+    box.appendChild(s);
+    var tabs = $("ftabs"); tabs.textContent = "";
+    MAP.forEach(function(m, k){
+      var b = el("button", "", m.n); b.setAttribute("role", "tab"); b.setAttribute("aria-selected", k === floorNow ? "true" : "false");
+      b.onclick = function(){ floorNow = k; hitRoom = ""; drawMap(); };
+      tabs.appendChild(b);
+    });
+  }
+  function loadMap(){
+    return getJSON("/api/map").then(function(d){ MAP = d || []; $("s-map").hidden = !MAP.length; drawMap(); }).catch(function(){ $("s-map").hidden = true; });
+  }
+
+  // ----- 검색 -----
+  function go(id){ var e = $(id); if (e && !e.hidden) e.scrollIntoView({behavior: "smooth", block: "start"}); }
+  function search(q){
+    var n = norm(q), out = [], seen = {};
+    if (!n) return out;
+    function add(kind, title, sub, act){ var k = kind + title; if (!seen[k] && norm(title + sub).indexOf(n) >= 0){ seen[k] = 1; out.push({kind: kind, title: title, sub: sub, act: act}); } }
+    MAP.forEach(function(f, k){ f.t.forEach(function(t){ var name = t[3].replace(/\|/g, " "); add("교실", name, f.n[0] + "층", {floor: k, room: norm(name)}); }); });
+    (INFO.links || []).forEach(function(x){ add("바로가기", x.title, x.desc, {url: x.url}); });
+    (INFO.more || []).forEach(function(x){ add("링크", x.title, x.group, {url: x.url}); });
+    (INFO.connectors || []).forEach(function(x){ add("AI 커넥터", x.title, x.desc, {sec: "s-conn"}); });
+    (INFO.schedule || []).forEach(function(x){ add("일정", x.name, x.day + " · " + x.dday, {sec: "s-sched"}); });
+    (INFO.events || []).forEach(function(x){ add("행사", x.title, x.day, {sec: "s-events"}); });
+    (INFO.clubs || []).forEach(function(x){ add("동아리", x.name, x.desc, {sec: "s-clubs"}); });
+    (INFO.promo || []).forEach(function(x){ add("소식", x.title, x.desc, {sec: "s-promo"}); });
+    NEWS.forEach(function(x){ add("기사", x.title, x.source + " · " + x.day, {url: x.url}); });
+    if ("급식아침점심저녁조식중식석식".indexOf(n) >= 0) out.push({kind: "급식", title: "급식 보기", sub: "", act: {sec: "meal"}});
+    return out.slice(0, 30);
+  }
+  function showHits(){
+    var q = $("q").value, box = $("hits"); box.textContent = "";
+    if (!norm(q)){ box.hidden = true; return; }
+    var res = search(q); box.hidden = false;
+    if (!res.length){ box.appendChild(el("div", "muted", "'" + q + "' 검색 결과가 없어요.")); return; }
+    res.forEach(function(h){
+      var r = row({tag: h.kind, title: h.title, desc: h.sub, url: h.act.url});
+      if (!h.act.url){ r.setAttribute("role", "button"); r.tabIndex = 0;
+        r.onclick = function(){
+          if (h.act.room){ floorNow = h.act.floor; hitRoom = h.act.room; drawMap(); go("s-map"); } else go(h.act.sec);
+          box.hidden = true;
+        };
+        r.onkeydown = function(e){ if (e.key === "Enter") r.onclick(); };
+      }
+      box.appendChild(r);
+    });
+  }
+  $("q").addEventListener("input", showHits);
+  $("q").addEventListener("focus", showHits);
 
   function clock(){
     var n = new Date();
     $("clock").textContent = (n.getMonth() + 1) + "월 " + n.getDate() + "일 " + "일월화수목금토"[n.getDay()] + "요일";
   }
 
-  clock(); loadMeal(""); loadInfo(); loadNews();
+  clock(); loadMeal(""); loadInfo(); loadNews(); loadMap();
   // 앱을 다시 열면(다른 앱 갔다 오면) 지금 시간에 맞는 급식으로 새로 고침
   document.addEventListener("visibilitychange", function(){
     if (!document.hidden){ clock(); if (!state.manual) loadMeal(""); loadInfo(); }
