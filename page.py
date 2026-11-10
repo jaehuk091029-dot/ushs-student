@@ -446,7 +446,8 @@ footer a{text-decoration:underline}
       return Notification.requestPermission().then(function(p){
         if (p !== "granted"){ notiUI(null, "브라우저에서 알림이 차단되어 있어요. 주소창 왼쪽 자물쇠 → 알림을 '허용'으로 바꿔 주세요."); return; }
         return swReg.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: b64u(pushKey)}).then(function(s){
-          return post("/api/push/subscribe", s.toJSON()).then(function(r){ notiUI(r.ok ? s : null, r.ok ? null : "알림 등록에 실패했어요. 잠시 뒤 다시 눌러 주세요."); });
+          var body = s.toJSON(); body.hello = true;
+          return post("/api/push/subscribe", body).then(function(r){ notiUI(r.ok ? s : null, r.ok ? "알림을 켰어요. 확인 알림이 곧 도착해요." : "알림 등록에 실패했어요. 잠시 뒤 다시 눌러 주세요."); });
         });
       });
     }).catch(function(){ notiUI(null, "알림을 켜지 못했어요. 잠시 뒤 다시 눌러 주세요."); });

@@ -26,6 +26,7 @@ import base64
 import hashlib
 import json
 import os
+import sys
 import threading
 import re
 import time
@@ -159,10 +160,12 @@ CONNECTORS = [
 # 3-4. 학교 지도 제작자, 급식 알림 시각
 MAP_BY = "지도 제작: ADEUS"
 PUSH_SLOTS = [  # (급식 코드, 이름, 알림 보내기 시작 시각, 이 시각이 지나면 그 끼니 알림은 안 보냄)
-    ("1", "아침", 7.0, 8.5),
-    ("2", "점심", 12.0, 13.0),
-    ("3", "저녁", 18.0, 19.0),
+    ("1", "아침", 7.0, 7.75),
+    ("2", "점심", 12.0, 12.75),
+    ("3", "저녁", 18.0, 18.75),
 ]
+# 알림 구독 묶음(암호화됨)이 보관되는 곳. 서버가 켜질 때 여기서 스스로 복구함 (저장소 이름이 바뀌면 같이 바꿀 것)
+PUSH_BACKUP_URL = "https://raw.githubusercontent.com/jaehuk091029-dot/ushs-student/push-data/subs.txt"
 
 # 3-2. 학교 기사 (구글 뉴스에서 아래 낱말로 검색해 제목에 그 낱말이 들어간 기사만 보여 줌)
 NEWS_WORDS = ["울산과학고", "울산과고"]
@@ -200,6 +203,11 @@ NEIS_TIMEOUT = 3           # 나이스 응답 대기(초). 카카오는 5초 안
 # ======================================================================
 # 여기부터는 수정하지 않아도 됨
 # ======================================================================
+
+try:
+    sys.stdout.reconfigure(line_buffering=True)   # print 한 내용이 서버 기록에 바로 보이게 함
+except Exception:
+    pass
 
 app = Flask(__name__)
 app.json.ensure_ascii = False
@@ -842,13 +850,16 @@ def api_info():
 
 
 # ---------- 급식 알림 (웹 푸시) ----------
-# 구독 정보는 서버 메모리에 두고, GitHub Actions 가 10분마다 암호화된 묶음으로 받아 저장소(push-data 가지)에 보관함.
-# 서버가 다시 켜지면 Actions 가 그 묶음을 돌려줘서 복구함. 알림 열쇠는 NEIS_KEY 에서 만들어 따로 넣을 것이 없음.
+# 구독 정보는 서버 메모리에 두고, GitHub Actions 가 틈틈이 암호화된 묶음으로 받아 저장소(push-data 가지)에 보관함.
+# 서버는 켜질 때 그 묶음을 스스로 읽어 복구하고, 잠들지 않도록 10분마다 자기 주소를 한 번씩 부르며,
+# 1분마다 시계를 보고 7시·12시·18시가 되면 직접 알림을 보냄. 알림 열쇠는 NEIS_KEY 에서 만들어 따로 넣을 것이 없음.
 
 SUBS = {}        # endpoint -> 구독 정보
 SENT = {}        # "날짜-끼니" -> True (같은 알림을 두 번 보내지 않기 위함)
 LAST_BLOB = {"hash": "", "text": ""}
 PUSH_LOCK = threading.Lock()
+SELF_URL = os.environ.get("RENDER_EXTERNAL_URL", "").rstrip("/")
+PUSH_HOST = SELF_URL.replace("https://", "") or "ushs-student.onrender.com"
 PUSH_HOSTS = ("fcm.googleapis.com", ".push.services.mozilla.com", ".notify.windows.com", ".push.apple.com")
 
 
@@ -893,27 +904,97 @@ def push_state():
     return json.dumps({"subs": [SUBS[k] for k in sorted(SUBS)], "sent": sorted(SENT)}, sort_keys=True, separators=(",", ":"))
 
 
+PUSH_LOG = []    # 최근 전송 결과 (어디로 보냈는지는 적지 않고 성공·실패 이유만 적음). /api/push/status 에서 확인
+
+
+def push_note(title, result):
+    PUSH_LOG.append({"time": datetime.now(KST).strftime("%m-%d %H:%M:%S"), "title": title, "result": result})
+    del PUSH_LOG[:-30]
+    print("[알림]", title, result)
+
+
 def send_push(sub, payload):
     priv, _ = vapid_keys()
+    service = sub["endpoint"].split("/")[2]
     try:
         webpush(clean_sub(sub), json.dumps(payload, ensure_ascii=False).encode("utf-8"), vapid_private_key=priv,
-                vapid_claims={"sub": "https://" + sub.get("_host", "ushs-student.onrender.com")}, ttl=3600, timeout=8)
+                vapid_claims={"sub": "https://" + PUSH_HOST}, ttl=3600, timeout=8, headers={"Urgency": "high"})
+        push_note(payload.get("title", ""), "성공 (" + service + ")")
         return True
     except WebPushException as e:
-        code = getattr(getattr(e, "response", None), "status_code", 0)
+        resp = getattr(e, "response", None)
+        code = getattr(resp, "status_code", 0)
         if code in (404, 410):
             SUBS.pop(sub["endpoint"], None)   # 브라우저에서 알림을 끈 구독은 지움
-        print("[알림] 실패", code)
+        push_note(payload.get("title", ""), "실패 " + str(code) + " (" + service + ") " + str(getattr(resp, "text", "") or e)[:120])
     except Exception as e:
-        print("[알림] 실패", repr(e))
+        push_note(payload.get("title", ""), "실패 (" + service + ") " + repr(e)[:120])
     return False
 
 
-def send_all(payload, host):
-    n = 0
+def send_all(payload):
+    total, n = len(SUBS), 0
     for sub in list(SUBS.values()):
-        n += send_push(dict(sub, _host=host), payload)
-    print("[알림] 보냄", n, "/", len(SUBS))
+        n += send_push(sub, payload)
+    print("[알림] 보냄", n, "/", total, payload.get("title"))
+
+
+def merge_blob(text):
+    lines = text.strip().split("\n")
+    data = json.loads(fernet().decrypt(lines[-1].encode()).decode())
+    with PUSH_LOCK:
+        for s in data.get("subs", []):
+            if valid_sub(s) and len(SUBS) < 3000:
+                SUBS.setdefault(s["endpoint"], clean_sub(s))
+        for k in data.get("sent", []):
+            SENT[str(k)] = True
+    return len(SUBS)
+
+
+def meal_push_tick():
+    # 지금이 알림 시간이면 그 끼니 급식을 한 번만 보냄. 구독자가 없거나 급식 조회에 실패하면 다음에 다시 시도함
+    now = datetime.now(KST)
+    h = now.hour + now.minute / 60
+    slot = next((s for s in PUSH_SLOTS if s[2] <= h < s[3]), None)
+    if not slot:
+        return {"ok": True, "sent": 0, "why": "알림 시간이 아님"}
+    key = now.strftime("%Y%m%d") + "-" + slot[0]
+    with PUSH_LOCK:
+        if SENT.get(key):
+            return {"ok": True, "sent": 0, "why": "이미 보냄"}
+        if not SUBS:
+            return {"ok": True, "sent": 0, "why": "구독자 없음"}
+        try:
+            rows = neis("mealServiceDietInfo", {"MLSV_YMD": now.strftime("%Y%m%d"), "MMEAL_SC_CODE": slot[0]})
+        except Exception as e:
+            print("[알림] 급식 조회 실패", repr(e))
+            return {"ok": False, "why": "급식 조회 실패"}
+        SENT[key] = True
+    if not rows:
+        return {"ok": True, "sent": 0, "why": "급식 없음"}
+    payload = {"title": "오늘 " + slot[1] + " 급식", "body": ", ".join(menu_items(rows[0].get("DDISH_NM"))), "tag": "meal-" + key, "url": "/"}
+    threading.Thread(target=send_all, args=(payload,), daemon=True).start()
+    return {"ok": True, "sent": len(SUBS)}
+
+
+def push_keeper():
+    # 서버가 켜져 있는 동안 계속 도는 일꾼
+    try:
+        r = requests.get(PUSH_BACKUP_URL, timeout=10)
+        if r.status_code == 200 and r.text.strip():
+            print("[알림] 보관된 구독 복구:", merge_blob(r.text), "명")
+    except Exception as e:
+        print("[알림] 구독 복구 실패", repr(e))
+    n = 0
+    while True:
+        try:
+            meal_push_tick()
+            if SELF_URL and n % 10 == 0:
+                requests.get(SELF_URL + "/status", timeout=20)   # 15분 동안 아무도 안 쓰면 잠드는 것을 막음
+        except Exception as e:
+            print("[알림] 일꾼 오류", repr(e))
+        n += 1
+        time.sleep(60)
 
 
 @app.route("/sw.js", methods=["GET"])
@@ -933,7 +1014,11 @@ def push_subscribe():
     s = request.get_json(silent=True) or {}
     if not push_on() or not valid_sub(s) or (len(SUBS) >= 3000 and s["endpoint"] not in SUBS):
         return jsonify({"ok": False}), 400
+    new = s["endpoint"] not in SUBS
     SUBS[s["endpoint"]] = clean_sub(s)
+    if new and s.get("hello"):   # 방금 알림을 켠 사람에게는 잘 켜졌는지 바로 알 수 있게 한 번 보내 줌
+        hello = {"title": "급식 알림이 켜졌어요", "body": "매일 아침 7시, 점심 12시, 저녁 6시에 급식을 알려 드릴게요.", "tag": "hello", "url": "/"}
+        threading.Thread(target=send_push, args=(clean_sub(s), hello), daemon=True).start()
     return jsonify({"ok": True})
 
 
@@ -950,8 +1035,13 @@ def push_test():
     sub = SUBS.get(s.get("endpoint", ""))
     if not push_on() or not sub:
         return jsonify({"ok": False}), 400
-    ok = send_push(dict(sub, _host=request.host), {"title": "급식 알림이 켜졌어요", "body": "매일 아침 7시, 점심 12시, 저녁 6시에 급식을 알려 드릴게요.", "tag": "test", "url": "/"})
+    ok = send_push(sub, {"title": "급식 알림이 켜졌어요", "body": "매일 아침 7시, 점심 12시, 저녁 6시에 급식을 알려 드릴게요.", "tag": "test", "url": "/"})
     return jsonify({"ok": ok})
+
+
+@app.route("/api/push/status", methods=["GET"])
+def push_status():
+    return jsonify({"on": push_on(), "subs": len(SUBS), "sent": sorted(SENT), "now": datetime.now(KST).strftime("%m-%d %H:%M:%S"), "log": PUSH_LOG[-30:]})
 
 
 @app.route("/api/push/blob", methods=["GET"])
@@ -974,43 +1064,17 @@ def push_restore():
     if not push_on():
         return jsonify({"ok": False}), 400
     try:
-        lines = request.get_data(as_text=True).strip().split("\n")
-        data = json.loads(fernet().decrypt(lines[-1].encode()).decode())
+        n = merge_blob(request.get_data(as_text=True))
     except (InvalidToken, ValueError, IndexError):
         return jsonify({"ok": False}), 400
-    with PUSH_LOCK:
-        for s in data.get("subs", []):
-            if valid_sub(s) and len(SUBS) < 3000:
-                SUBS.setdefault(s["endpoint"], clean_sub(s))
-        for k in data.get("sent", []):
-            SENT[str(k)] = True
-    return jsonify({"ok": True, "subs": len(SUBS)})
+    return jsonify({"ok": True, "subs": n})
 
 
 @app.route("/cron/meal-push", methods=["GET"])
 def cron_meal_push():
     if not push_on():
         return jsonify({"ok": False})
-    now = datetime.now(KST)
-    h = now.hour + now.minute / 60
-    slot = next((s for s in PUSH_SLOTS if s[2] <= h < s[3]), None)
-    if not slot:
-        return jsonify({"ok": True, "sent": 0, "why": "알림 시간이 아님"})
-    key = now.strftime("%Y%m%d") + "-" + slot[0]
-    with PUSH_LOCK:
-        if SENT.get(key):
-            return jsonify({"ok": True, "sent": 0, "why": "이미 보냄"})
-        try:
-            rows = neis("mealServiceDietInfo", {"MLSV_YMD": now.strftime("%Y%m%d"), "MMEAL_SC_CODE": slot[0]})
-        except Exception as e:
-            print("[알림] 급식 조회 실패", repr(e))
-            return jsonify({"ok": False, "why": "급식 조회 실패"})
-        SENT[key] = True
-    if not rows or not SUBS:
-        return jsonify({"ok": True, "sent": 0, "why": "급식 없음" if not rows else "구독자 없음"})
-    payload = {"title": "오늘 " + slot[1] + " 급식", "body": ", ".join(menu_items(rows[0].get("DDISH_NM"))), "tag": "meal-" + key, "url": "/"}
-    threading.Thread(target=send_all, args=(payload, request.host), daemon=True).start()
-    return jsonify({"ok": True, "sent": len(SUBS)})
+    return jsonify(meal_push_tick())
 
 
 @app.route("/api/map", methods=["GET"])
@@ -1078,4 +1142,6 @@ def test():
 # Render 처럼 "python app.py" 로 켜는 서버와 내 컴퓨터에서 쓰임. Vercel 에서는 이 부분이 실행되지 않음
 # Render 는 PORT 라는 이름으로 문 번호를 정해 주므로 그 번호를 받아 씀 (없으면 5000)
 if __name__ == "__main__":
+    if push_on():
+        threading.Thread(target=push_keeper, daemon=True).start()
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False, threaded=True)
