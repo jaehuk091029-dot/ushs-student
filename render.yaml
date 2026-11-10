@@ -1,0 +1,12 @@
+# Render 가 이 파일을 읽고 설정 칸을 알아서 채움 (직접 입력할 것은 NEIS_KEY 값 하나뿐)
+services:
+  - type: web
+    name: ushs-student
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: NEIS_KEY
+        sync: false
