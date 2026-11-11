@@ -72,10 +72,10 @@ NEIS_KEY = os.environ.get("NEIS_KEY", "").strip()
 LINKS = [
     {
         "title": "게시판",
-        "desc": "동아리 홍보 게시판(포스터 올리기)과 자유 게시판이에요. 학교 구글 계정(@ushs.hs.kr)으로 로그인해야 열려요. 카톡에서 안 열리면 오른쪽 위 메뉴에서 '다른 브라우저로 열기'를 눌러 보세요.",
+        "desc": "동아리 홍보 게시판(포스터 올리기), 자유 게시판, 익명 게시판이에요. 학교 구글 계정(@ushs.hs.kr)으로 로그인해야 열려요. 카톡에서 안 열리면 오른쪽 위 메뉴에서 '다른 브라우저로 열기'를 눌러 보세요.",
         "url": "https://script.google.com/a/macros/ushs.hs.kr/s/AKfycby2gOXvtxIrsN8IEo8oOp2D0up47iO7iImfhoiqHPYY-iCouFVPZY330BDXmFn_7t0A/exec",
         "button": "게시판 열기",
-        "keywords": ["게시판", "자유게시판", "자유 게시판", "홍보 게시판", "포스터", "글쓰기"],
+        "keywords": ["게시판", "자유게시판", "자유 게시판", "홍보 게시판", "포스터", "글쓰기", "익명", "고민"],
     },
     {
         "title": "기상곡 신청",
@@ -92,6 +92,20 @@ LINKS = [
         "by": "제작 동아리: ACE, LICHEM, AiBE, LAYOUT",
         "button": "예약하러 가기",
         "keywords": ["화학실", "생물실", "실험실", "실험실 신청", "실험실 예약"],
+    },
+    {
+        "title": "교직원 위치 찾기",
+        "desc": "선생님 이름을 넣으면 계신 곳의 위치와 실 번호를 캠퍼스 조감도에서 보여 줘요.",
+        "url": "https://bejewelled-lokum-e67e6a.netlify.app/",
+        "button": "찾으러 가기",
+        "keywords": ["교직원 찾기", "교직원 위치", "선생님 위치", "선생님 찾기", "쌤 위치", "쌤 찾기", "교사 위치"],
+    },
+    {
+        "title": "교무실별 교직원 검색",
+        "desc": "실 번호(예: A104)를 넣으면 그 교무실의 위치와 계신 선생님을 보여 줘요.",
+        "url": "https://incomparable-nougat-d0f748.netlify.app/",
+        "button": "검색하러 가기",
+        "keywords": ["교무실별", "교무실 검색", "교무실 선생님", "호실 검색", "실번호", "실 번호", "공간 검색"],
     },
     {
         "title": "학교 위치알리미",
