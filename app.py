@@ -193,10 +193,10 @@ NEWS_WORDS = ["울산과학고", "울산과고"]
 NEWS_COUNT = 8             # 보여 줄 기사 수
 
 # 4. 동아리
-#    category 는 창체(창의적 체험활동 동아리) / 자율(자율·학술 동아리). 10개가 넘으면 챗봇에서는 이름 목록으로 보여 주고, 이름을 보내면 자세히 알려 줌
+#    category 는 창체 / 학술 / 유네스코 / 자율. 10개가 넘으면 챗봇에서는 이름 목록으로 보여 주고, 이름을 보내면 자세히 알려 줌
 #    url 은 없으면 "" 로 두기
 CLUBS = [
-    {"name": "수학탐구", "category": "창체", "desc": "지도교사: 이영희, 전상균 · 21명", "url": ""},
+    {"name": "수학탐구(FORMAT)", "category": "창체", "desc": "지도교사: 이영희, 전상균 · 21명", "url": ""},
     {"name": "수학체험(MAGIC)", "category": "창체", "desc": "지도교사: 김다은, 김지혜 · 19명", "url": ""},
     {"name": "물리실험반(EMP)", "category": "창체", "desc": "지도교사: 이승주, 김해일, 김혜경 · 19명", "url": ""},
     {"name": "화학실험(ACE)", "category": "창체", "desc": "지도교사: 김현아, 박성대, 정혜영 · 20명", "url": ""},
@@ -206,30 +206,30 @@ CLUBS = [
     {"name": "정보과학(lay-out)반", "category": "창체", "desc": "지도교사: 이병석, 박정호 · 14명", "url": ""},
     {"name": "인공지능연구반(ADEUS)", "category": "창체", "desc": "지도교사: 김재원, 황대호 · 15명", "url": ""},
     {"name": "인문독서연구반(PHILOBIBLIO)", "category": "창체", "desc": "지도교사: 진현화 · 9명", "url": ""},
-    {"name": "SIC", "category": "창체", "desc": "지도교사: 하지현 · 10명", "url": ""},
+    {"name": "융합탐구반(SIC)", "category": "창체", "desc": "지도교사: 하지현 · 10명", "url": ""},
     {"name": "융합공학탐구반(AERO)", "category": "창체", "desc": "지도교사: 임윤성, 천세은 · 15명", "url": ""},
-    {"name": "LICHEM", "category": "창체", "desc": "지도교사: 구선희, 전수미 · 20명", "url": ""},
-    {"name": "EXPONENTIAL(수학학술반)", "category": "자율", "desc": "지도교사: 오덕기 · 15명", "url": ""},
-    {"name": "물리학술동아리(INFINITY)", "category": "자율", "desc": "지도교사: 김해일 · 11명", "url": ""},
-    {"name": "CHEMICORE", "category": "자율", "desc": "지도교사: 구선희 · 20명", "url": ""},
-    {"name": "비스타", "category": "자율", "desc": "지도교사: 최선 · 11명", "url": ""},
-    {"name": "정보학술", "category": "자율", "desc": "지도교사: 이병석 · 16명", "url": ""},
-    {"name": "천문학술동아리(LuceVista)", "category": "자율", "desc": "지도교사: 황대호 · 13명", "url": ""},
-    {"name": "온정나눔동아리", "category": "자율", "desc": "지도교사: 전상균 · 18명", "url": ""},
+    {"name": "화학실험(LICHEM)", "category": "창체", "desc": "지도교사: 구선희, 전수미 · 20명", "url": ""},
+    {"name": "수학학술(EXPONENTIAL)", "category": "학술", "desc": "지도교사: 오덕기 · 15명", "url": ""},
+    {"name": "물리학술(INFINITY)", "category": "학술", "desc": "지도교사: 김해일 · 11명", "url": ""},
+    {"name": "화학학술(CHEMICORE)", "category": "학술", "desc": "지도교사: 구선희 · 20명", "url": ""},
+    {"name": "생명학술(BSTAR)", "category": "학술", "desc": "지도교사: 최선 · 11명", "url": ""},
+    {"name": "정보학술(STUDIO)", "category": "학술", "desc": "지도교사: 이병석 · 16명", "url": ""},
+    {"name": "천문학술동아리(LuceVista)", "category": "학술", "desc": "지도교사: 황대호 · 13명", "url": ""},
+    {"name": "온정나눔동아리", "category": "유네스코", "desc": "도서관에서 초등학생들에게 수업 봉사를 하는 동아리 · 지도교사: 전상균 · 18명", "url": ""},
     {"name": "Gradient(수학물리융합반)", "category": "자율", "desc": "지도교사: 오덕기 · 21명", "url": ""},
-    {"name": "MRC", "category": "자율", "desc": "지도교사: 최선 · 16명", "url": ""},
+    {"name": "MRC(해부)", "category": "자율", "desc": "지도교사: 최선 · 16명", "url": ""},
     {"name": "창업활동(ADAGIO)", "category": "자율", "desc": "지도교사: 전상균 · 24명", "url": ""},
-    {"name": "Ensemble", "category": "자율", "desc": "지도교사: 권오준 · 21명", "url": ""},
-    {"name": "USb", "category": "자율", "desc": "지도교사: 이지선 · 22명", "url": ""},
-    {"name": "C-mile", "category": "자율", "desc": "지도교사: 임윤성 · 16명", "url": ""},
-    {"name": "더불어 사는 세상", "category": "자율", "desc": "지도교사: 하지현 · 30명", "url": ""},
-    {"name": "국제교류코랩", "category": "자율", "desc": "지도교사: 이영희 · 27명", "url": ""},
-    {"name": "Packet", "category": "자율", "desc": "지도교사: 이병석 · 10명", "url": ""},
-    {"name": "CORAL", "category": "자율", "desc": "지도교사: 최선 · 30명", "url": ""},
+    {"name": "Ensemble(오케스트라)", "category": "자율", "desc": "지도교사: 권오준 · 21명", "url": ""},
+    {"name": "USb(밴드부)", "category": "자율", "desc": "지도교사: 이지선 · 22명", "url": ""},
+    {"name": "C-mile(댄스부)", "category": "자율", "desc": "지도교사: 임윤성 · 16명", "url": ""},
+    {"name": "더불어 사는 세상(고양이 돌봄)", "category": "자율", "desc": "지도교사: 하지현 · 30명", "url": ""},
+    {"name": "국제교류코랩", "category": "자율", "desc": "일본과 국제교류를 하는 동아리 · 지도교사: 이영희 · 27명", "url": ""},
+    {"name": "Packet(해킹)", "category": "자율", "desc": "지도교사: 이병석 · 10명", "url": ""},
+    {"name": "CORAL(수생학)", "category": "자율", "desc": "지도교사: 최선 · 30명", "url": ""},
     {"name": "C.O.T.B(체스)", "category": "자율", "desc": "지도교사: 최선 · 18명", "url": ""},
-    {"name": "P.A.C.", "category": "자율", "desc": "지도교사: 이지선 · 26명", "url": ""},
-    {"name": "아름다운 카페", "category": "자율", "desc": "지도교사: 하지현 · 11명", "url": ""},
-    {"name": "team WOD", "category": "자율", "desc": "지도교사: 박성대 · 6명", "url": ""},
+    {"name": "P.A.C.(흑인힙합동아리)", "category": "자율", "desc": "지도교사: 이지선 · 26명", "url": ""},
+    {"name": "아름다운 카페(카페활동)", "category": "자율", "desc": "지도교사: 하지현 · 11명", "url": ""},
+    {"name": "team WOD(헬스부)", "category": "자율", "desc": "지도교사: 박성대 · 6명", "url": ""},
     {"name": "공학반(The Gear)", "category": "자율", "desc": "지도교사: 이승주 · 9명", "url": ""},
     {"name": "On-Air(방송반)", "category": "자율", "desc": "지도교사: 이병석 · 17명", "url": ""},
 ]
@@ -636,7 +636,12 @@ def events(utter):
 def club_keys(c):
     # 동아리를 찾을 때 쓰는 낱말: 전체 이름과 괄호로 나뉜 각 부분 (예: "화학실험(ACE)" → 화학실험(ace), 화학실험, ace)
     n = squash(c["name"]).lower()
-    return set([n] + [p for p in re.split(r"[()]", n) if len(p) >= 2])
+    keys = set([n] + [p for p in re.split(r"[()]", n) if len(p) >= 2])
+    for k in list(keys):   # "온정나눔동아리" → "온정나눔", "방송반" → "방송" 으로도 찾을 수 있게
+        short = re.sub(r"(동아리|반|부)$", "", k)
+        if len(short) >= 2:
+            keys.add(short)
+    return keys
 
 
 def clubs(utter):
