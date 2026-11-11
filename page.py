@@ -138,7 +138,7 @@ footer a{text-decoration:underline}
 <body>
 <div class="top"><div class="wrap"><img src="/icon.png?v=2" alt=""><span class="nm"><b>__SCHOOL__</b><small>ULSAN SCIENCE HIGH SCHOOL</small></span></div></div>
 <div class="bar"><div class="wrap">
-  <nav><a href="#meal">급식</a><a href="https://script.google.com/a/macros/ushs.hs.kr/s/AKfycby2gOXvtxIrsN8IEo8oOp2D0up47iO7iImfhoiqHPYY-iCouFVPZY330BDXmFn_7t0A/exec" target="_blank" rel="noopener">게시판</a><a href="#s-links">바로가기</a><a href="#s-sched">일정</a><a href="#s-news">기사</a><a href="#s-map">지도</a><a href="#s-conn">AI</a><a href="#s-more">링크</a></nav>
+  <nav><a href="#meal">급식</a><a href="https://script.google.com/a/macros/ushs.hs.kr/s/AKfycby2gOXvtxIrsN8IEo8oOp2D0up47iO7iImfhoiqHPYY-iCouFVPZY330BDXmFn_7t0A/exec" target="_blank" rel="noopener">게시판</a><a href="https://pf.kakao.com/_VGtxeX/chat" target="_blank" rel="noopener">챗봇</a><a href="#s-links">바로가기</a><a href="#s-sched">일정</a><a href="#s-news">기사</a><a href="#s-map">지도</a><a href="#s-conn">AI</a><a href="#s-more">링크</a></nav>
   <span id="clock"></span>
 </div></div>
 
