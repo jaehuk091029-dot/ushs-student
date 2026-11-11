@@ -85,6 +85,13 @@ a.row:hover .t, .links a:hover{text-decoration:underline}
 .links{display:grid; grid-template-columns:1fr 1fr; column-gap:14px}
 .links a{position:relative; padding:4px 0 4px 18px; font-size:16px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
 .links a:before{content:""; position:absolute; left:2px; top:15px; width:5px; height:5px; background:#333}
+.cbtn{background:#fff; color:#333; border:1px solid #4a4138; padding:8px 16px; font-size:15.5px; font-weight:700}
+.chips{display:flex; flex-wrap:wrap; gap:6px; margin:12px 0 6px}
+.chips button{background:#fff; color:#333; border:1px solid #4a4138; padding:6px 12px; font-size:14.5px; font-weight:700}
+.chips button[aria-pressed="true"]{background:#2b2520; color:#fff; border-color:#2b2520}
+.chips.sub{margin-top:0}
+.chips.sub button{font-size:13.5px; padding:4px 10px; border-color:#8a8076; font-weight:400}
+.chips.sub button[aria-pressed="true"]{background:#6a5f53; border-color:#6a5f53; font-weight:700}
 .fav{width:18px; height:18px; flex:none; align-self:center; object-fit:contain}
 .row.hasfav{padding-left:0}
 .row.hasfav:before{display:none}
@@ -138,7 +145,7 @@ footer a{text-decoration:underline}
 <body>
 <div class="top"><div class="wrap"><img src="/icon.png?v=2" alt=""><span class="nm"><b>__SCHOOL__</b><small>ULSAN SCIENCE HIGH SCHOOL</small></span></div></div>
 <div class="bar"><div class="wrap">
-  <nav><a href="#meal">급식</a><a href="https://script.google.com/a/macros/ushs.hs.kr/s/AKfycby2gOXvtxIrsN8IEo8oOp2D0up47iO7iImfhoiqHPYY-iCouFVPZY330BDXmFn_7t0A/exec" target="_blank" rel="noopener">게시판</a><a href="https://pf.kakao.com/_VGtxeX/chat" target="_blank" rel="noopener">챗봇</a><a href="#s-links">바로가기</a><a href="#s-sched">일정</a><a href="#s-news">기사</a><a href="#s-map">지도</a><a href="#s-conn">AI</a><a href="#s-more">링크</a></nav>
+  <nav><a href="#meal">급식</a><a href="https://script.google.com/a/macros/ushs.hs.kr/s/AKfycby2gOXvtxIrsN8IEo8oOp2D0up47iO7iImfhoiqHPYY-iCouFVPZY330BDXmFn_7t0A/exec" target="_blank" rel="noopener">게시판</a><a href="https://pf.kakao.com/_VGtxeX/chat" target="_blank" rel="noopener">챗봇</a><a href="#s-clubs" id="navclub">동아리</a><a href="#s-links">바로가기</a><a href="#s-sched">일정</a><a href="#s-news">기사</a><a href="#s-map">지도</a><a href="#s-conn">AI</a><a href="#s-more">링크</a></nav>
   <span id="clock"></span>
 </div></div>
 
@@ -162,11 +169,11 @@ footer a{text-decoration:underline}
 <div class="wrap body">
   <div class="cols">
     <section id="s-links" hidden><div class="shead"><h3>바로가기</h3></div><div id="links"></div></section>
+    <section id="s-clubs" hidden><div class="shead"><h3>동아리</h3></div><button id="cbtn" class="cbtn">동아리 살펴보기</button><div id="cpanel" hidden><div class="chips" id="ccat"></div><div class="chips sub" id="csub" hidden></div><div id="clubs"></div></div></section>
     <section id="s-sched"><div class="shead"><h3><i>학사</i>일정</h3><a id="homelink" hidden target="_blank" rel="noopener">학교 홈페이지 ⟩</a></div><div id="sched"><div class="muted">불러오는 중…</div></div></section>
     <section id="s-news" hidden><div class="shead"><h3><i>학교</i> 기사</h3><a href="https://news.google.com/search?q=%EC%9A%B8%EC%82%B0%EA%B3%BC%ED%95%99%EA%B3%A0&hl=ko&gl=KR&ceid=KR:ko" target="_blank" rel="noopener">더보기 ⟩</a></div><div id="news"></div></section>
     <section id="s-events" hidden><div class="shead"><h3>행사</h3></div><div id="events"></div></section>
     <section id="s-promo" hidden><div class="shead"><h3>소식</h3></div><div id="promo"></div></section>
-    <section id="s-clubs" hidden><div class="shead"><h3>동아리</h3></div><div id="clubs"></div></section>
   </div>
   <section id="s-map" class="wide" hidden><div class="shead"><h3><i>학교</i> 지도</h3></div>
     <div class="ftabs" id="ftabs" role="tablist"></div>
@@ -290,7 +297,7 @@ footer a{text-decoration:underline}
       INFO = d; $("mapby").textContent = d.mapBy || ""; 
       fill("s-events", "events", d.events, function(x){ return {title:x.title, desc:x.desc, url:x.url, side:x.day}; });
       fill("s-promo", "promo", d.promo, function(x){ return {title:x.title, desc:x.desc, url:x.url, image:x.image}; });
-      fill("s-clubs", "clubs", d.clubs, function(x){ return {tag:x.category, title:x.name, desc:x.desc, url:x.url}; });
+      CLUBS = d.clubs || []; $("s-clubs").hidden = !CLUBS.length; if (!$("cpanel").hidden) drawClubs();
       var mo = $("more"), groups = {}, order = [];
       mo.textContent = "";
       (d.more || []).forEach(function(x){
@@ -340,6 +347,37 @@ footer a{text-decoration:underline}
       fill("s-news", "news", d.items, function(x){ return {title:x.title, desc:x.source, url:x.url, side:(x.day || "").slice(2)}; });
     }).catch(function(){ $("s-news").hidden = true; });
   }
+
+  // ----- 동아리 살펴보기 -----
+  // 위쪽 버튼(전체·창체·학술·자율·유네스코)을 누르면 그 분류만 걸러서 보여 줌. 자율은 한 줄 더 나와서 예체능·학술·취미 등으로 다시 거름
+  var CLUBS = [], ccat = "", csub = "";
+  function uniq(list){ var o = []; list.forEach(function(x){ if (x && o.indexOf(x) < 0) o.push(x); }); return o; }
+  function chip(box, label, on, fn){ var b = el("button", "", label); b.setAttribute("aria-pressed", on ? "true" : "false"); b.onclick = fn; box.appendChild(b); }
+  function drawClubs(){
+    var count = function(list, key, v){ return list.filter(function(c){ return c[key] === v; }).length; };
+    var cb = $("ccat"); cb.textContent = "";
+    chip(cb, "전체 " + CLUBS.length, !ccat, function(){ ccat = ""; csub = ""; drawClubs(); });
+    uniq(CLUBS.map(function(c){ return c.category; })).forEach(function(k){
+      chip(cb, k + " " + count(CLUBS, "category", k), ccat === k, function(){ ccat = k; csub = ""; drawClubs(); });
+    });
+    var inCat = CLUBS.filter(function(c){ return !ccat || c.category === ccat; });
+    var subs = ccat ? uniq(inCat.map(function(c){ return c.sub; })) : [];
+    var sb = $("csub"); sb.textContent = ""; sb.hidden = !subs.length;
+    if (subs.length){
+      chip(sb, "전체", !csub, function(){ csub = ""; drawClubs(); });
+      subs.forEach(function(k){ chip(sb, k + " " + count(inCat, "sub", k), csub === k, function(){ csub = k; drawClubs(); }); });
+    }
+    var box = $("clubs"); box.textContent = "";
+    inCat.filter(function(c){ return !csub || c.sub === csub; }).forEach(function(x){
+      box.appendChild(row({tag: x.sub ? x.category + "·" + x.sub : x.category, title: x.name, desc: x.desc, url: x.url}));
+    });
+  }
+  function openClubs(){ if ($("cpanel").hidden){ $("cpanel").hidden = false; $("cbtn").textContent = "동아리 접기"; drawClubs(); } }
+  $("cbtn").onclick = function(){
+    if ($("cpanel").hidden) return openClubs();
+    $("cpanel").hidden = true; $("cbtn").textContent = "동아리 살펴보기";
+  };
+  $("navclub").onclick = function(e){ e.preventDefault(); go("s-clubs"); };
 
   // ----- 학교 지도 -----
   var NS = "http://www.w3.org/2000/svg", MAP = [], INFO = {}, NEWS = [], floorNow = 0, hitRoom = "";
@@ -467,7 +505,7 @@ footer a{text-decoration:underline}
   };
 
   // ----- 검색 -----
-  function go(id){ var e = $(id); if (e && !e.hidden) e.scrollIntoView({behavior: "smooth", block: "start"}); }
+  function go(id){ if (id === "s-clubs") openClubs(); var e = $(id); if (e && !e.hidden) e.scrollIntoView({behavior: "smooth", block: "start"}); }
   function search(q){
     var n = norm(q), out = [], seen = {};
     if (!n) return out;
