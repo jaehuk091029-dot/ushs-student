@@ -193,7 +193,7 @@ NEWS_WORDS = ["울산과학고", "울산과고"]
 NEWS_COUNT = 8             # 보여 줄 기사 수
 
 # 4. 동아리
-#    category 는 창체 / 학술 / 유네스코 / 자율. 10개가 넘으면 챗봇에서는 이름 목록으로 보여 주고, 이름을 보내면 자세히 알려 줌
+#    category 는 창체 / 학술 / 자율 / 유네스코. 자율 동아리는 sub 로 한 번 더 나눔(예체능 / 학술 / 취미 / 봉사·교류). 10개가 넘으면 챗봇에서는 이름 목록으로 보여 주고, 이름을 보내면 자세히 알려 줌
 #    url 은 없으면 "" 로 두기
 CLUBS = [
     {"name": "수학탐구(FORMAT)", "category": "창체", "desc": "지도교사: 이영희, 전상균 · 21명", "url": ""},
@@ -215,23 +215,23 @@ CLUBS = [
     {"name": "생명학술(BSTAR)", "category": "학술", "desc": "지도교사: 최선 · 11명", "url": ""},
     {"name": "정보학술(STUDIO)", "category": "학술", "desc": "지도교사: 이병석 · 16명", "url": ""},
     {"name": "천문학술동아리(LuceVista)", "category": "학술", "desc": "지도교사: 황대호 · 13명", "url": ""},
+    {"name": "Ensemble(오케스트라)", "category": "자율", "sub": "예체능", "desc": "지도교사: 권오준 · 21명", "url": ""},
+    {"name": "USb(밴드부)", "category": "자율", "sub": "예체능", "desc": "지도교사: 이지선 · 22명", "url": ""},
+    {"name": "C-mile(댄스부)", "category": "자율", "sub": "예체능", "desc": "지도교사: 임윤성 · 16명", "url": ""},
+    {"name": "P.A.C.(흑인힙합동아리)", "category": "자율", "sub": "예체능", "desc": "지도교사: 이지선 · 26명", "url": ""},
+    {"name": "team WOD(헬스부)", "category": "자율", "sub": "예체능", "desc": "지도교사: 박성대 · 6명", "url": ""},
+    {"name": "Gradient(수학물리융합반)", "category": "자율", "sub": "학술", "desc": "지도교사: 오덕기 · 21명", "url": ""},
+    {"name": "MRC(해부)", "category": "자율", "sub": "학술", "desc": "지도교사: 최선 · 16명", "url": ""},
+    {"name": "Packet(해킹)", "category": "자율", "sub": "학술", "desc": "지도교사: 이병석 · 10명", "url": ""},
+    {"name": "CORAL(수생학)", "category": "자율", "sub": "학술", "desc": "지도교사: 최선 · 30명", "url": ""},
+    {"name": "공학반(The Gear)", "category": "자율", "sub": "학술", "desc": "지도교사: 이승주 · 9명", "url": ""},
+    {"name": "창업활동(ADAGIO)", "category": "자율", "sub": "취미", "desc": "지도교사: 전상균 · 24명", "url": ""},
+    {"name": "C.O.T.B(체스)", "category": "자율", "sub": "취미", "desc": "지도교사: 최선 · 18명", "url": ""},
+    {"name": "아름다운 카페(카페활동)", "category": "자율", "sub": "취미", "desc": "지도교사: 하지현 · 11명", "url": ""},
+    {"name": "On-Air(방송반)", "category": "자율", "sub": "취미", "desc": "지도교사: 이병석 · 17명", "url": ""},
+    {"name": "더불어 사는 세상(고양이 돌봄)", "category": "자율", "sub": "봉사·교류", "desc": "지도교사: 하지현 · 30명", "url": ""},
+    {"name": "국제교류코랩", "category": "자율", "sub": "봉사·교류", "desc": "일본과 국제교류를 하는 동아리 · 지도교사: 이영희 · 27명", "url": ""},
     {"name": "온정나눔동아리", "category": "유네스코", "desc": "도서관에서 초등학생들에게 수업 봉사를 하는 동아리 · 지도교사: 전상균 · 18명", "url": ""},
-    {"name": "Gradient(수학물리융합반)", "category": "자율", "desc": "지도교사: 오덕기 · 21명", "url": ""},
-    {"name": "MRC(해부)", "category": "자율", "desc": "지도교사: 최선 · 16명", "url": ""},
-    {"name": "창업활동(ADAGIO)", "category": "자율", "desc": "지도교사: 전상균 · 24명", "url": ""},
-    {"name": "Ensemble(오케스트라)", "category": "자율", "desc": "지도교사: 권오준 · 21명", "url": ""},
-    {"name": "USb(밴드부)", "category": "자율", "desc": "지도교사: 이지선 · 22명", "url": ""},
-    {"name": "C-mile(댄스부)", "category": "자율", "desc": "지도교사: 임윤성 · 16명", "url": ""},
-    {"name": "더불어 사는 세상(고양이 돌봄)", "category": "자율", "desc": "지도교사: 하지현 · 30명", "url": ""},
-    {"name": "국제교류코랩", "category": "자율", "desc": "일본과 국제교류를 하는 동아리 · 지도교사: 이영희 · 27명", "url": ""},
-    {"name": "Packet(해킹)", "category": "자율", "desc": "지도교사: 이병석 · 10명", "url": ""},
-    {"name": "CORAL(수생학)", "category": "자율", "desc": "지도교사: 최선 · 30명", "url": ""},
-    {"name": "C.O.T.B(체스)", "category": "자율", "desc": "지도교사: 최선 · 18명", "url": ""},
-    {"name": "P.A.C.(흑인힙합동아리)", "category": "자율", "desc": "지도교사: 이지선 · 26명", "url": ""},
-    {"name": "아름다운 카페(카페활동)", "category": "자율", "desc": "지도교사: 하지현 · 11명", "url": ""},
-    {"name": "team WOD(헬스부)", "category": "자율", "desc": "지도교사: 박성대 · 6명", "url": ""},
-    {"name": "공학반(The Gear)", "category": "자율", "desc": "지도교사: 이승주 · 9명", "url": ""},
-    {"name": "On-Air(방송반)", "category": "자율", "desc": "지도교사: 이병석 · 17명", "url": ""},
 ]
 
 # 5. 홍보 (학생회 공지, 대회 안내, 모집 공고 등)
@@ -647,31 +647,46 @@ def club_keys(c):
 def clubs(utter):
     u = squash(utter).lower()
     q_word = re.sub(r"동아리|소개|알려줘|목록|보여줘|전체|뭐있어|뭐가있어|\?", "", u)
-    cats = []
+    cats, subs = [], []
     for c in CLUBS:
         if c.get("category") and c["category"] not in cats:
             cats.append(c["category"])
-    q = [quick(c, c + " 동아리") for c in cats[:8]] + [quick("전체 동아리"), quick("처음으로")]
-    found = CLUBS
+        if c.get("sub") and c["sub"] not in subs:
+            subs.append(c["sub"])
+    found, pick = CLUBS, ""
     if q_word:
-        hit = [c for c in CLUBS if any(k in u for k in club_keys(c)) or q_word == c.get("category", "") or q_word in squash(c["name"]).lower()]
+        # "자율 학술"처럼 자율 안의 세부 분류 → 분류(창체·학술·자율·유네스코) → 동아리 이름 순서로 찾음
+        cat = "자율" if "자율" in q_word else next((x for x in cats if x in q_word), "")
+        sub = next((x for x in subs if any(w in q_word for w in squash(x).split("·"))), "")
+        if sub and (cat == "자율" or sub not in cats):
+            hit, pick = [c for c in CLUBS if c.get("sub") == sub], "자율"
+        elif cat:
+            hit, pick = [c for c in CLUBS if c.get("category") == cat], cat
+        else:
+            hit = [c for c in CLUBS if any(k in u for k in club_keys(c)) or q_word in squash(c["name"]).lower()]
         if hit:
-            found = hit  # 이름이나 분야가 맞으면 그것만, 아니면 전체
+            found = hit  # 맞는 것이 있으면 그것만, 없으면 전체
+    if pick == "자율":
+        # 자율 동아리를 보고 있을 때는 세부 분류 버튼을 보여 줌
+        q = [quick(x if x not in cats else "자율 " + x, "자율 " + x + " 동아리") for x in subs[:6]] + [quick("자율 전체", "자율 동아리"), quick("전체 동아리"), quick("처음으로")]
+    else:
+        q = [quick(c, c + " 동아리") for c in cats[:8]] + [quick("전체 동아리"), quick("처음으로")]
     if len(found) > 10:
         # 카드는 10장까지만 보낼 수 있어서, 많을 때는 이름 목록으로 보여 줌
+        by_sub = pick == "자율"
         lines = []
-        for cat in cats or [""]:
-            names = [c["name"] for c in found if c.get("category", "") == cat]
+        for g in (subs if by_sub else cats) or [""]:
+            names = [c["name"] for c in found if c.get("sub" if by_sub else "category", "") == g]
             if names:
-                lines.append(("[" + cat + " 동아리] " if cat else "") + str(len(names)) + "개")
+                lines.append(("[" + ("자율·" if by_sub else "") + g + "] " if g else "") + str(len(names)) + "개")
                 lines += ["· " + n for n in names]
                 lines.append("")
-        text = "📚 동아리 " + str(len(found)) + "개\n\n" + "\n".join(lines).strip() + "\n\n동아리 이름을 보내면 자세히 알려 드려요. (예: ACE)"
+        text = "📚 " + (pick + " " if pick else "") + "동아리 " + str(len(found)) + "개\n\n" + "\n".join(lines).strip() + "\n\n동아리 이름을 보내면 자세히 알려 드려요. (예: ACE)"
         return reply(split_text(text), q)
     items = []
     for c in found[:10]:
         btn = [link_button("자세히 보기", c["url"])] if c.get("url") else None
-        cat = "[" + c["category"] + "] " if c.get("category") else ""
+        cat = "[" + c["category"] + ("·" + c["sub"] if c.get("sub") else "") + "] " if c.get("category") else ""
         items.append(card(c["name"], cat + c.get("desc", ""), btn))
     return reply([carousel("textCard", items)], q)
 
