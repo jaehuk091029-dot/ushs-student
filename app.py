@@ -218,6 +218,7 @@ NEXT_DAY_AFTER = 19.5      # 이 시각(19시 30분) 이후에 그냥 "급식"�
 BREAKFAST_UNTIL = 8.5      # 앱: 이 시각(8시 30분)까지는 아침 급식을 먼저 보여 줌
 LUNCH_UNTIL = 13.5         # 앱: 이 시각(13시 30분)까지는 점심, 그 뒤 NEXT_DAY_AFTER 까지는 저녁, 그 뒤는 내일 아침
 APP_SHORT_NAME = "울산과학고"  # 휴대폰 홈 화면에 추가했을 때 아이콘 아래 나오는 이름
+APP_URL = "https://ushs-student.onrender.com"   # 앱(사이트) 주소. 챗봇 첫 화면의 '앱 열기' 버튼이 여기로 감
 SCHEDULE_DAYS = 30         # 학사일정 기본 조회 기간(일)
 NEIS_TIMEOUT = 3           # 나이스 응답 대기(초). 카카오는 5초 안에 답해야 함
 
@@ -762,6 +763,7 @@ def home(unknown):
     outs.append({"textCard": card(
         SCHOOL_NAME + " 챗봇",
         "급식, 학사일정, 학교 기사, 행사, 동아리, 홍보, 각종 신청 링크를 안내해요.\n'내일 점심', '금요일 급식', '12월 일정'처럼 물어봐도 돼요.",
+        [link_button("앱 열기", APP_URL)],
     )})
     return reply(outs)
 
