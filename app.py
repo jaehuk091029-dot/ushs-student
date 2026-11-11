@@ -193,12 +193,45 @@ NEWS_WORDS = ["울산과학고", "울산과고"]
 NEWS_COUNT = 8             # 보여 줄 기사 수
 
 # 4. 동아리
-#    category 로 분야를 나누면 "학술 동아리"처럼 분야별로 볼 수 있음
+#    category 는 창체(창의적 체험활동 동아리) / 자율(자율·학술 동아리). 10개가 넘으면 챗봇에서는 이름 목록으로 보여 주고, 이름을 보내면 자세히 알려 줌
 #    url 은 없으면 "" 로 두기
 CLUBS = [
-    {"name": "동아리 이름 1", "category": "학술", "desc": "어떤 활동을 하는지 한두 문장", "url": ""},
-    {"name": "동아리 이름 2", "category": "공학", "desc": "어떤 활동을 하는지 한두 문장", "url": ""},
-    {"name": "동아리 이름 3", "category": "예체능", "desc": "어떤 활동을 하는지 한두 문장", "url": ""},
+    {"name": "수학탐구", "category": "창체", "desc": "지도교사: 이영희, 전상균 · 21명", "url": ""},
+    {"name": "수학체험(MAGIC)", "category": "창체", "desc": "지도교사: 김다은, 김지혜 · 19명", "url": ""},
+    {"name": "물리실험반(EMP)", "category": "창체", "desc": "지도교사: 이승주, 김해일, 김혜경 · 19명", "url": ""},
+    {"name": "화학실험(ACE)", "category": "창체", "desc": "지도교사: 김현아, 박성대, 정혜영 · 20명", "url": ""},
+    {"name": "생물실험반(AIBE)", "category": "창체", "desc": "지도교사: 송정기, 최선, 이희성 · 21명", "url": ""},
+    {"name": "물리탐구반(E.T.F)", "category": "창체", "desc": "지도교사: 염성식 · 9명", "url": ""},
+    {"name": "화학생명융합반(CBC)", "category": "창체", "desc": "지도교사: 오덕기, 박미숙 · 14명", "url": ""},
+    {"name": "정보과학(lay-out)반", "category": "창체", "desc": "지도교사: 이병석, 박정호 · 14명", "url": ""},
+    {"name": "인공지능연구반(ADEUS)", "category": "창체", "desc": "지도교사: 김재원, 황대호 · 15명", "url": ""},
+    {"name": "인문독서연구반(PHILOBIBLIO)", "category": "창체", "desc": "지도교사: 진현화 · 9명", "url": ""},
+    {"name": "SIC", "category": "창체", "desc": "지도교사: 하지현 · 10명", "url": ""},
+    {"name": "융합공학탐구반(AERO)", "category": "창체", "desc": "지도교사: 임윤성, 천세은 · 15명", "url": ""},
+    {"name": "LICHEM", "category": "창체", "desc": "지도교사: 구선희, 전수미 · 20명", "url": ""},
+    {"name": "EXPONENTIAL(수학학술반)", "category": "자율", "desc": "지도교사: 오덕기 · 15명", "url": ""},
+    {"name": "물리학술동아리(INFINITY)", "category": "자율", "desc": "지도교사: 김해일 · 11명", "url": ""},
+    {"name": "CHEMICORE", "category": "자율", "desc": "지도교사: 구선희 · 20명", "url": ""},
+    {"name": "비스타", "category": "자율", "desc": "지도교사: 최선 · 11명", "url": ""},
+    {"name": "정보학술", "category": "자율", "desc": "지도교사: 이병석 · 16명", "url": ""},
+    {"name": "천문학술동아리(LuceVista)", "category": "자율", "desc": "지도교사: 황대호 · 13명", "url": ""},
+    {"name": "온정나눔동아리", "category": "자율", "desc": "지도교사: 전상균 · 18명", "url": ""},
+    {"name": "Gradient(수학물리융합반)", "category": "자율", "desc": "지도교사: 오덕기 · 21명", "url": ""},
+    {"name": "MRC", "category": "자율", "desc": "지도교사: 최선 · 16명", "url": ""},
+    {"name": "창업활동(ADAGIO)", "category": "자율", "desc": "지도교사: 전상균 · 24명", "url": ""},
+    {"name": "Ensemble", "category": "자율", "desc": "지도교사: 권오준 · 21명", "url": ""},
+    {"name": "USb", "category": "자율", "desc": "지도교사: 이지선 · 22명", "url": ""},
+    {"name": "C-mile", "category": "자율", "desc": "지도교사: 임윤성 · 16명", "url": ""},
+    {"name": "더불어 사는 세상", "category": "자율", "desc": "지도교사: 하지현 · 30명", "url": ""},
+    {"name": "국제교류코랩", "category": "자율", "desc": "지도교사: 이영희 · 27명", "url": ""},
+    {"name": "Packet", "category": "자율", "desc": "지도교사: 이병석 · 10명", "url": ""},
+    {"name": "CORAL", "category": "자율", "desc": "지도교사: 최선 · 30명", "url": ""},
+    {"name": "C.O.T.B(체스)", "category": "자율", "desc": "지도교사: 최선 · 18명", "url": ""},
+    {"name": "P.A.C.", "category": "자율", "desc": "지도교사: 이지선 · 26명", "url": ""},
+    {"name": "아름다운 카페", "category": "자율", "desc": "지도교사: 하지현 · 11명", "url": ""},
+    {"name": "team WOD", "category": "자율", "desc": "지도교사: 박성대 · 6명", "url": ""},
+    {"name": "공학반(The Gear)", "category": "자율", "desc": "지도교사: 이승주 · 9명", "url": ""},
+    {"name": "On-Air(방송반)", "category": "자율", "desc": "지도교사: 이병석 · 17명", "url": ""},
 ]
 
 # 5. 홍보 (학생회 공지, 대회 안내, 모집 공고 등)
@@ -331,7 +364,12 @@ def live_links():
 
 
 def main_quick():
-    base = [quick(t) for t in ["오늘 급식", "내일 급식", "학사일정", "학교 기사", "행사", "동아리", "홍보"]]
+    labels = ["오늘 급식", "내일 급식", "급식 알림", "학사일정", "학교 기사", "동아리"]
+    if any(not is_sample(e.get("title", "")) for e in EVENTS):
+        labels.append("행사")
+    if any(not is_sample(p.get("title", "")) for p in PROMO):
+        labels.append("홍보")
+    base = [quick(t) for t in labels]
     links = [quick(l["title"]) for l in live_links()[:2]]
     return (base + links + [quick("링크 모음")])[:10]
 
@@ -362,6 +400,7 @@ BLOCKS = {
     "동아리": "clubs",
     "홍보": "promo",
     "링크 모음": "links",
+    "급식 알림": "noti",
     "학교 기사": "news",
     "AI 사이트": "ai",
     "시약 검색": "conn",
@@ -377,10 +416,15 @@ BLOCKS = {
 
 def by_words(utter):
     u = squash(utter)
+    low = u.lower()
+    if ("동아리" in u and "게시판" not in u) or any(low in club_keys(c) for c in CLUBS):
+        return "clubs"
     for l in live_links():
         words = [l["title"]] + l.get("keywords", [])
         if any(squash(w) in u for w in words):
             return "link:" + l["title"]
+    if re.search(r"알림|알람", u):
+        return "noti"
     if re.search(r"기사|뉴스|신문|보도", u):
         return "news"
     if re.search(r"시약|커넥터|mcp|msds", u, re.I):
@@ -402,6 +446,8 @@ def by_words(utter):
     for name in sorted(ROOMS, key=len, reverse=True):
         if name in u.lower():
             return "room:" + name
+    if any(k in low for c in CLUBS for k in club_keys(c)):
+        return "clubs"
     if re.search(r"지도|약도|몇층|어디", u):
         return "map"
     if re.search(r"메뉴|처음|도움|시작|안녕|하이", u):
@@ -415,6 +461,8 @@ def handle(utter, block=""):
         for l in live_links():
             if l["title"] == what[5:]:
                 return one_link(l)
+    if what == "noti":
+        return noti()
     if what == "news":
         return news()
     if what == "conn":
@@ -573,7 +621,7 @@ def schedule(utter, intro=""):
 
 def events(utter):
     t = today().strftime("%Y-%m-%d")
-    up = sorted([e for e in EVENTS if e.get("date", "") >= t], key=lambda e: e["date"])
+    up = sorted([e for e in EVENTS if e.get("date", "") >= t and not is_sample(e.get("title", ""))], key=lambda e: e["date"])
     if not up:
         return schedule(utter, "따로 등록된 행사가 없어서 학사일정을 보여 드릴게요.")
     items = []
@@ -585,8 +633,15 @@ def events(utter):
 
 # ---------- 동아리 ----------
 
+def club_keys(c):
+    # 동아리를 찾을 때 쓰는 낱말: 전체 이름과 괄호로 나뉜 각 부분 (예: "화학실험(ACE)" → 화학실험(ace), 화학실험, ace)
+    n = squash(c["name"]).lower()
+    return set([n] + [p for p in re.split(r"[()]", n) if len(p) >= 2])
+
+
 def clubs(utter):
-    q_word = re.sub(r"동아리|소개|알려줘|목록|보여줘|전체|뭐있어|뭐가있어|\?", "", squash(utter))
+    u = squash(utter).lower()
+    q_word = re.sub(r"동아리|소개|알려줘|목록|보여줘|전체|뭐있어|뭐가있어|\?", "", u)
     cats = []
     for c in CLUBS:
         if c.get("category") and c["category"] not in cats:
@@ -594,29 +649,37 @@ def clubs(utter):
     q = [quick(c, c + " 동아리") for c in cats[:8]] + [quick("전체 동아리"), quick("처음으로")]
     found = CLUBS
     if q_word:
-        hit = [c for c in CLUBS if q_word in squash(c["name"] + c.get("category", ""))]
+        hit = [c for c in CLUBS if any(k in u for k in club_keys(c)) or q_word == c.get("category", "") or q_word in squash(c["name"]).lower()]
         if hit:
             found = hit  # 이름이나 분야가 맞으면 그것만, 아니면 전체
-    outs = []
     if len(found) > 10:
-        outs.append(simple_text(f"동아리가 {len(found)}개라 10개까지만 보여 드려요. 아래에서 분야를 골라 보세요."))
+        # 카드는 10장까지만 보낼 수 있어서, 많을 때는 이름 목록으로 보여 줌
+        lines = []
+        for cat in cats or [""]:
+            names = [c["name"] for c in found if c.get("category", "") == cat]
+            if names:
+                lines.append(("[" + cat + " 동아리] " if cat else "") + str(len(names)) + "개")
+                lines += ["· " + n for n in names]
+                lines.append("")
+        text = "📚 동아리 " + str(len(found)) + "개\n\n" + "\n".join(lines).strip() + "\n\n동아리 이름을 보내면 자세히 알려 드려요. (예: ACE)"
+        return reply(split_text(text), q)
     items = []
     for c in found[:10]:
         btn = [link_button("자세히 보기", c["url"])] if c.get("url") else None
         cat = "[" + c["category"] + "] " if c.get("category") else ""
         items.append(card(c["name"], cat + c.get("desc", ""), btn))
-    outs.append(carousel("textCard", items))
-    return reply(outs, q)
+    return reply([carousel("textCard", items)], q)
 
 
 # ---------- 홍보 ----------
 
 def promo():
-    if not PROMO:
+    real = [p for p in PROMO if not is_sample(p.get("title", ""))]
+    if not real:
         return reply([simple_text("지금 올라온 홍보가 없어요.")])
-    with_photo = all(p.get("image") for p in PROMO)
+    with_photo = all(p.get("image") for p in real)
     items = []
-    for p in PROMO[:10]:
+    for p in real[:10]:
         btn = [link_button(p.get("button") or "자세히 보기", p["url"])] if p.get("url") else None
         c = card(p["title"], p.get("desc"), btn)
         if with_photo:
@@ -754,6 +817,16 @@ def one_link(l):
     return reply([{"textCard": card(l["title"], desc, [link_button(l.get("button") or "열기", l["url"])])}])
 
 
+# ---------- 급식 알림 안내 ----------
+
+def noti():
+    times = " · ".join(s[1] + " " + str(int(s[2])) + "시" for s in PUSH_SLOTS)
+    desc = ("매일 " + times + "에 그 끼니 급식을 휴대폰 알림으로 보내 드려요.\n"
+            "아래 버튼으로 앱을 열고 '급식 알림 받기'를 한 번만 누르면 돼요.\n"
+            "아이폰은 먼저 '홈 화면에 추가'를 한 뒤 그 앱에서 눌러 주세요.")
+    return reply([{"textCard": card("🔔 급식 알림 받기", desc, [link_button("알림 켜러 가기", APP_URL + "/#meal")])}])
+
+
 # ---------- 첫 화면 ----------
 
 def home(unknown):
@@ -762,7 +835,7 @@ def home(unknown):
         outs.append(simple_text("무슨 말인지 잘 모르겠어요 😅 아래 버튼을 눌러 보세요."))
     outs.append({"textCard": card(
         SCHOOL_NAME + " 챗봇",
-        "급식, 학사일정, 학교 기사, 행사, 동아리, 홍보, 각종 신청 링크를 안내해요.\n'내일 점심', '금요일 급식', '12월 일정'처럼 물어봐도 돼요.",
+        "급식, 급식 알림, 학사일정, 학교 기사, 동아리, 각종 신청 링크를 안내해요.\n'내일 점심', '금요일 급식', '12월 일정'처럼 물어봐도 돼요.",
         [link_button("앱 열기", APP_URL)],
     )})
     return reply(outs)
