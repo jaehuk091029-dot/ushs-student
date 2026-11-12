@@ -422,7 +422,9 @@ footer a{text-decoration:underline}
     var s = sv("svg", {viewBox: "0 0 " + f.w + " " + f.h, role: "img", "aria-label": f.b + " " + f.n + " 지도"}), line = "#6a5f53";
     s.style.width = (ZOOM * 100) + "%";
     function cross(x, y, w, h){ s.appendChild(sv("path", {d: "M" + x + " " + y + "L" + (x + w) + " " + (y + h) + "M" + (x + w) + " " + y + "L" + x + " " + (y + h), stroke: "#b9b1a8", "stroke-width": 1, fill: "none"})); }
-    (f.c || []).forEach(function(c){ s.appendChild(sv("rect", {x: c[0], y: c[1], width: c[2], height: c[3], fill: "#ddd8d1"})); });
+    // 복도: 먼저 테두리 선까지 그리고, 그 위에 색만 한 번 더 칠해서 복도끼리 맞닿은 안쪽 선은 지우고 바깥 테두리만 남긴다
+    (f.c || []).forEach(function(c){ s.appendChild(sv("rect", {x: c[0], y: c[1], width: c[2], height: c[3], fill: "#d6d0c8", stroke: line, "stroke-width": 2.6})); });
+    (f.c || []).forEach(function(c){ s.appendChild(sv("rect", {x: c[0], y: c[1], width: c[2], height: c[3], fill: "#d6d0c8"})); });
     (f.o || []).forEach(function(o){
       s.appendChild(sv("circle", {cx: o[0], cy: o[1], r: o[2], fill: FILL[o[3]] || "#fff", stroke: line, "stroke-width": 1.4}));
       if (o[3] === "x"){ var d = o[2] * 0.707; cross(o[0] - d, o[1] - d, d * 2, d * 2); }
