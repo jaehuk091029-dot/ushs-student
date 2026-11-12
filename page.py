@@ -92,6 +92,10 @@ a.row:hover .t, .links a:hover{text-decoration:underline}
 .chips.sub{margin-top:0}
 .chips.sub button{font-size:13.5px; padding:4px 10px; border-color:#8a8076; font-weight:400}
 .chips.sub button[aria-pressed="true"]{background:#6a5f53; border-color:#6a5f53; font-weight:700}
+.sub{font-size:13.5px; font-weight:700; color:#b9772a; margin:10px 0 0}
+.sgrp .sub:first-child{margin-top:4px}
+.sgrp:not(.open) .x2{display:none}
+.morebtn{margin-top:10px; background:#fff; color:#333; border:1px solid #4a4138; padding:7px 14px; font-size:14.5px; font-weight:700}
 .fav{width:18px; height:18px; flex:none; align-self:center; object-fit:contain}
 .row.hasfav{padding-left:0}
 .row.hasfav:before{display:none}
@@ -138,6 +142,8 @@ footer a{text-decoration:underline}
   .cols section{padding-left:0; padding-right:0; break-inside:avoid}
   .cols{padding:0 16px}
   .links{grid-template-columns:1fr 1fr 1fr 1fr}
+  .sgrp:not(.open) .links a.x2{display:flex}
+  .sgrp:not(.open) .links a.x4{display:none}
   section.wide{padding-left:16px; padding-right:16px}
 }
 </style>
@@ -305,11 +311,31 @@ footer a{text-decoration:underline}
         groups[x.group].push(x);
         if (x.title === "학교 홈페이지"){ $("homelink").href = x.url; $("homelink").hidden = false; }
       });
+      var linkA = function(x){ var a = el("a", "hasfav"); a.href = x.url; a.target = "_blank"; a.rel = "noopener"; a.appendChild(fav(x.url)); a.appendChild(el("span", "", x.title)); return a; };
       order.forEach(function(g){
         mo.appendChild(el("div", "grp", g));
-        var c = el("div", "links");
-        groups[g].forEach(function(x){ var a = el("a", "hasfav"); a.href = x.url; a.target = "_blank"; a.rel = "noopener"; a.appendChild(fav(x.url)); a.appendChild(el("span", "", x.title)); c.appendChild(a); });
-        mo.appendChild(c);
+        var subs = {}, sorder = [];
+        groups[g].forEach(function(x){ var s = x.sub || ""; if (!subs[s]){ subs[s] = []; sorder.push(s); } subs[s].push(x); });
+        if (sorder.length === 1 && !sorder[0]){
+          var c = el("div", "links");
+          groups[g].forEach(function(x){ c.appendChild(linkA(x)); });
+          mo.appendChild(c);
+          return;
+        }
+        // 갈래(과목·기능)마다 앞쪽 몇 개만 먼저 보여 주고, "더 알아보기"를 누르면 나머지가 펼쳐진다
+        var wrap = el("div", "sgrp" + (OPENG[g] ? " open" : "")), hidden = 0;
+        sorder.forEach(function(s){
+          if (s) wrap.appendChild(el("div", "sub", s));
+          var c = el("div", "links");
+          subs[s].forEach(function(x, k){ var a = linkA(x); if (k >= 2){ a.classList.add("x2"); hidden++; } if (k >= 4) a.classList.add("x4"); c.appendChild(a); });
+          wrap.appendChild(c);
+        });
+        mo.appendChild(wrap);
+        if (!hidden) return;
+        var mb = el("button", "morebtn");
+        var label = function(){ mb.textContent = OPENG[g] ? g + " 접기" : g + " 더 알아보기 (" + groups[g].length + "개)"; mb.setAttribute("aria-expanded", OPENG[g] ? "true" : "false"); };
+        mb.onclick = function(){ OPENG[g] = !OPENG[g]; wrap.classList.toggle("open", !!OPENG[g]); label(); };
+        label(); mo.appendChild(mb);
       });
       $("s-more").hidden = !order.length;
       var cn = $("conn"); cn.textContent = "";
@@ -380,7 +406,7 @@ footer a{text-decoration:underline}
   $("navclub").onclick = function(e){ e.preventDefault(); go("s-clubs"); };
 
   // ----- 학교 지도 -----
-  var NS = "http://www.w3.org/2000/svg", MAP = [], INFO = {}, NEWS = [], floorNow = 0, hitRoom = "";
+  var NS = "http://www.w3.org/2000/svg", MAP = [], INFO = {}, NEWS = [], OPENG = {}, floorNow = 0, hitRoom = "";
   function sv(tag, at){ var e = document.createElementNS(NS, tag); for (var k in at) e.setAttribute(k, at[k]); return e; }
   function norm(s){ return (s || "").toLowerCase().replace(/\s+/g, ""); }
   function drawMap(){
@@ -512,7 +538,7 @@ footer a{text-decoration:underline}
     function add(kind, title, sub, act){ var k = kind + title; if (!seen[k] && norm(title + sub).indexOf(n) >= 0){ seen[k] = 1; out.push({kind: kind, title: title, sub: sub, act: act}); } }
     MAP.forEach(function(f, k){ f.t.forEach(function(t){ var name = t[3].replace(/\|/g, " "); add("교실", name, f.n[0] + "층", {floor: k, room: norm(name)}); }); });
     (INFO.links || []).forEach(function(x){ add("바로가기", x.title, x.desc, {url: x.url}); });
-    (INFO.more || []).forEach(function(x){ add("링크", x.title, x.group, {url: x.url}); });
+    (INFO.more || []).forEach(function(x){ add("링크", x.title, x.group + (x.sub ? " · " + x.sub : ""), {url: x.url}); });
     (INFO.connectors || []).forEach(function(x){ add("AI 커넥터", x.title, x.desc, {sec: "s-conn"}); });
     (INFO.schedule || []).forEach(function(x){ add("일정", x.name, x.day + " · " + x.dday, {sec: "s-sched"}); });
     (INFO.events || []).forEach(function(x){ add("행사", x.title, x.day, {sec: "s-events"}); });
