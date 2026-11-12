@@ -126,16 +126,49 @@ LINKS = [
 
 # 3-1. 링크 모음 (앱 맨 아래 "링크 모음"과 챗봇 "링크 모음"에 나옴)
 #    group 이 같은 것끼리 묶여 나옴. 한 줄 추가하면 바로 늘어남. "학교 홈페이지"는 나이스에서 자동으로 찾아 넣음
+#    sub 를 적으면 그 묶음 안에서 다시 작은 갈래(과목, 기능)로 나뉨. 갈래마다 앞쪽 몇 개만 먼저 보이고
+#    나머지는 "더 알아보기"를 눌러야 나오므로, 많이 쓰는 것을 앞에 둘 것
 MORE_LINKS = [
-    {"group": "AI", "title": "베이즈 AI (BAZE)", "url": "https://baze.co/"},
-    {"group": "AI", "title": "ChatGPT", "url": "https://chatgpt.com"},
-    {"group": "AI", "title": "Claude", "url": "https://claude.ai"},
-    {"group": "AI", "title": "Gemini", "url": "https://gemini.google.com"},
-    {"group": "AI", "title": "Perplexity", "url": "https://www.perplexity.ai"},
-    {"group": "AI", "title": "Copilot", "url": "https://copilot.microsoft.com"},
-    {"group": "AI", "title": "NotebookLM", "url": "https://notebooklm.google.com"},
-    {"group": "AI", "title": "뤼튼", "url": "https://wrtn.ai"},
-    {"group": "AI", "title": "DeepL 번역", "url": "https://www.deepl.com"},
+    {"group": "AI", "sub": "대화·질문", "title": "베이즈 AI (BAZE)", "url": "https://baze.co/"},
+    {"group": "AI", "sub": "대화·질문", "title": "ChatGPT", "url": "https://chatgpt.com"},
+    {"group": "AI", "sub": "대화·질문", "title": "Claude", "url": "https://claude.ai"},
+    {"group": "AI", "sub": "대화·질문", "title": "Gemini", "url": "https://gemini.google.com"},
+    {"group": "AI", "sub": "대화·질문", "title": "Copilot", "url": "https://copilot.microsoft.com"},
+    {"group": "AI", "sub": "대화·질문", "title": "뤼튼", "url": "https://wrtn.ai"},
+    {"group": "AI", "sub": "대화·질문", "title": "Grok", "url": "https://grok.com"},
+    {"group": "AI", "sub": "검색·논문 조사", "title": "Perplexity", "url": "https://www.perplexity.ai"},
+    {"group": "AI", "sub": "검색·논문 조사", "title": "Consensus", "url": "https://consensus.app"},
+    {"group": "AI", "sub": "검색·논문 조사", "title": "Elicit", "url": "https://elicit.com"},
+    {"group": "AI", "sub": "검색·논문 조사", "title": "SciSpace", "url": "https://scispace.com"},
+    {"group": "AI", "sub": "검색·논문 조사", "title": "라이너", "url": "https://getliner.com"},
+    {"group": "AI", "sub": "검색·논문 조사", "title": "Connected Papers", "url": "https://www.connectedpapers.com"},
+    {"group": "AI", "sub": "검색·논문 조사", "title": "Research Rabbit", "url": "https://www.researchrabbit.ai"},
+    {"group": "AI", "sub": "자료 정리·요약", "title": "NotebookLM", "url": "https://notebooklm.google.com"},
+    {"group": "AI", "sub": "자료 정리·요약", "title": "릴리스 AI", "url": "https://lilys.ai"},
+    {"group": "AI", "sub": "자료 정리·요약", "title": "ChatPDF", "url": "https://www.chatpdf.com"},
+    {"group": "AI", "sub": "자료 정리·요약", "title": "클로바노트", "url": "https://clovanote.naver.com"},
+    {"group": "AI", "sub": "번역·영어 글쓰기", "title": "DeepL 번역", "url": "https://www.deepl.com"},
+    {"group": "AI", "sub": "번역·영어 글쓰기", "title": "파파고", "url": "https://papago.naver.com"},
+    {"group": "AI", "sub": "번역·영어 글쓰기", "title": "DeepL Write", "url": "https://www.deepl.com/write"},
+    {"group": "AI", "sub": "번역·영어 글쓰기", "title": "Grammarly", "url": "https://www.grammarly.com"},
+    {"group": "AI", "sub": "번역·영어 글쓰기", "title": "QuillBot", "url": "https://quillbot.com"},
+    {"group": "AI", "sub": "코딩", "title": "GitHub Copilot", "url": "https://github.com/features/copilot"},
+    {"group": "AI", "sub": "코딩", "title": "Google AI Studio", "url": "https://aistudio.google.com"},
+    {"group": "AI", "sub": "코딩", "title": "Cursor", "url": "https://cursor.com"},
+    {"group": "AI", "sub": "코딩", "title": "Replit", "url": "https://replit.com"},
+    {"group": "AI", "sub": "수학·공부", "title": "콴다", "url": "https://qanda.ai"},
+    {"group": "AI", "sub": "수학·공부", "title": "Symbolab", "url": "https://www.symbolab.com"},
+    {"group": "AI", "sub": "수학·공부", "title": "Khanmigo", "url": "https://www.khanmigo.ai"},
+    {"group": "AI", "sub": "발표·디자인", "title": "Gamma", "url": "https://gamma.app"},
+    {"group": "AI", "sub": "발표·디자인", "title": "Canva", "url": "https://www.canva.com"},
+    {"group": "AI", "sub": "발표·디자인", "title": "미리캔버스", "url": "https://www.miricanvas.com"},
+    {"group": "AI", "sub": "발표·디자인", "title": "Napkin AI", "url": "https://www.napkin.ai"},
+    {"group": "AI", "sub": "이미지·영상·음성", "title": "Adobe Firefly", "url": "https://firefly.adobe.com"},
+    {"group": "AI", "sub": "이미지·영상·음성", "title": "Midjourney", "url": "https://www.midjourney.com"},
+    {"group": "AI", "sub": "이미지·영상·음성", "title": "Runway", "url": "https://runwayml.com"},
+    {"group": "AI", "sub": "이미지·영상·음성", "title": "Vrew", "url": "https://vrew.ai"},
+    {"group": "AI", "sub": "이미지·영상·음성", "title": "Suno", "url": "https://suno.com"},
+    {"group": "AI", "sub": "이미지·영상·음성", "title": "ElevenLabs", "url": "https://elevenlabs.io"},
     {"group": "학교·행정", "title": "나이스플러스", "url": "https://www.neisplus.kr"},
     {"group": "학교·행정", "title": "나이스 대국민서비스", "url": "https://www.neis.go.kr"},
     {"group": "학교·행정", "title": "울산광역시교육청", "url": "https://www.use.go.kr"},
@@ -147,13 +180,65 @@ MORE_LINKS = [
     {"group": "입시·학습", "title": "POSTECH", "url": "https://www.postech.ac.kr"},
     {"group": "입시·학습", "title": "서울대 입학", "url": "https://admission.snu.ac.kr"},
     {"group": "입시·학습", "title": "EBSi", "url": "https://www.ebsi.co.kr"},
-    {"group": "탐구·연구", "title": "RISS 학술연구정보", "url": "https://www.riss.kr"},
-    {"group": "탐구·연구", "title": "구글 학술검색", "url": "https://scholar.google.com"},
-    {"group": "탐구·연구", "title": "ScienceON", "url": "https://scienceon.kisti.re.kr"},
-    {"group": "탐구·연구", "title": "NCBI", "url": "https://www.ncbi.nlm.nih.gov"},
-    {"group": "탐구·연구", "title": "arXiv", "url": "https://arxiv.org"},
-    {"group": "탐구·연구", "title": "KOSIS 국가통계", "url": "https://kosis.kr"},
-    {"group": "탐구·연구", "title": "공공데이터포털", "url": "https://www.data.go.kr"},
+    {"group": "탐구·연구", "sub": "물리", "title": "arXiv", "url": "https://arxiv.org"},
+    {"group": "탐구·연구", "sub": "물리", "title": "HyperPhysics", "url": "http://hyperphysics.phy-astr.gsu.edu/hbase/hframe.html"},
+    {"group": "탐구·연구", "sub": "물리", "title": "NIST 물리 상수", "url": "https://physics.nist.gov/cuu/Constants/"},
+    {"group": "탐구·연구", "sub": "물리", "title": "파인만 물리학 강의", "url": "https://www.feynmanlectures.caltech.edu"},
+    {"group": "탐구·연구", "sub": "물리", "title": "Falstad 회로 시뮬레이터", "url": "https://www.falstad.com/circuit/"},
+    {"group": "탐구·연구", "sub": "물리", "title": "NASA ADS 논문 검색", "url": "https://ui.adsabs.harvard.edu"},
+    {"group": "탐구·연구", "sub": "물리", "title": "APS Physics", "url": "https://physics.aps.org"},
+    {"group": "탐구·연구", "sub": "물리", "title": "한국물리학회", "url": "https://www.kps.or.kr"},
+    {"group": "탐구·연구", "sub": "화학", "title": "PubChem", "url": "https://pubchem.ncbi.nlm.nih.gov"},
+    {"group": "탐구·연구", "sub": "화학", "title": "Ptable 주기율표", "url": "https://ptable.com"},
+    {"group": "탐구·연구", "sub": "화학", "title": "NIST 화학 WebBook", "url": "https://webbook.nist.gov/chemistry/"},
+    {"group": "탐구·연구", "sub": "화학", "title": "MSDS 검색 (안전보건공단)", "url": "https://msds.kosha.or.kr"},
+    {"group": "탐구·연구", "sub": "화학", "title": "ChemSpider", "url": "https://www.chemspider.com"},
+    {"group": "탐구·연구", "sub": "화학", "title": "MolView 분자 모형", "url": "https://molview.org"},
+    {"group": "탐구·연구", "sub": "화학", "title": "대한화학회", "url": "https://www.kcsnet.or.kr"},
+    {"group": "탐구·연구", "sub": "생물", "title": "NCBI", "url": "https://www.ncbi.nlm.nih.gov"},
+    {"group": "탐구·연구", "sub": "생물", "title": "PubMed", "url": "https://pubmed.ncbi.nlm.nih.gov"},
+    {"group": "탐구·연구", "sub": "생물", "title": "BLAST", "url": "https://blast.ncbi.nlm.nih.gov/Blast.cgi"},
+    {"group": "탐구·연구", "sub": "생물", "title": "UniProt", "url": "https://www.uniprot.org"},
+    {"group": "탐구·연구", "sub": "생물", "title": "RCSB PDB 단백질 구조", "url": "https://www.rcsb.org"},
+    {"group": "탐구·연구", "sub": "생물", "title": "Ensembl", "url": "https://www.ensembl.org"},
+    {"group": "탐구·연구", "sub": "생물", "title": "bioRxiv", "url": "https://www.biorxiv.org"},
+    {"group": "탐구·연구", "sub": "생물", "title": "국가생물종지식정보시스템", "url": "https://www.nature.go.kr"},
+    {"group": "탐구·연구", "sub": "지구과학", "title": "기상자료개방포털", "url": "https://data.kma.go.kr"},
+    {"group": "탐구·연구", "sub": "지구과학", "title": "천문우주지식정보", "url": "https://astro.kasi.re.kr"},
+    {"group": "탐구·연구", "sub": "지구과학", "title": "USGS 지진 정보", "url": "https://earthquake.usgs.gov"},
+    {"group": "탐구·연구", "sub": "지구과학", "title": "NASA Worldview 위성 영상", "url": "https://worldview.earthdata.nasa.gov"},
+    {"group": "탐구·연구", "sub": "지구과학", "title": "earth 바람·해류 지도", "url": "https://earth.nullschool.net"},
+    {"group": "탐구·연구", "sub": "지구과학", "title": "Stellarium 웹 별자리", "url": "https://stellarium-web.org"},
+    {"group": "탐구·연구", "sub": "지구과학", "title": "바다누리 해양정보", "url": "https://www.khoa.go.kr/oceangrid/"},
+    {"group": "탐구·연구", "sub": "지구과학", "title": "SDSS SkyServer", "url": "https://skyserver.sdss.org"},
+    {"group": "탐구·연구", "sub": "수학", "title": "OEIS 수열 사전", "url": "https://oeis.org"},
+    {"group": "탐구·연구", "sub": "수학", "title": "MathWorld 수학 사전", "url": "https://mathworld.wolfram.com"},
+    {"group": "탐구·연구", "sub": "수학", "title": "arXiv 수학", "url": "https://arxiv.org/archive/math"},
+    {"group": "탐구·연구", "sub": "수학", "title": "3Blue1Brown", "url": "https://www.3blue1brown.com"},
+    {"group": "탐구·연구", "sub": "수학", "title": "Art of Problem Solving", "url": "https://artofproblemsolving.com"},
+    {"group": "탐구·연구", "sub": "수학", "title": "Project Euler", "url": "https://projecteuler.net"},
+    {"group": "탐구·연구", "sub": "수학", "title": "대한수학회", "url": "https://www.kms.or.kr"},
+    {"group": "탐구·연구", "sub": "정보", "title": "GitHub", "url": "https://github.com"},
+    {"group": "탐구·연구", "sub": "정보", "title": "Google Colab", "url": "https://colab.research.google.com"},
+    {"group": "탐구·연구", "sub": "정보", "title": "Kaggle", "url": "https://www.kaggle.com"},
+    {"group": "탐구·연구", "sub": "정보", "title": "Hugging Face", "url": "https://huggingface.co"},
+    {"group": "탐구·연구", "sub": "정보", "title": "solved.ac", "url": "https://solved.ac"},
+    {"group": "탐구·연구", "sub": "정보", "title": "Codeforces", "url": "https://codeforces.com"},
+    {"group": "탐구·연구", "sub": "정보", "title": "프로그래머스", "url": "https://programmers.co.kr"},
+    {"group": "탐구·연구", "sub": "정보", "title": "파이썬 문서", "url": "https://docs.python.org/ko/3/"},
+    {"group": "탐구·연구", "sub": "정보", "title": "MDN 웹 문서", "url": "https://developer.mozilla.org/ko/"},
+    {"group": "탐구·연구", "sub": "정보", "title": "한국정보올림피아드", "url": "https://koi.or.kr"},
+    {"group": "탐구·연구", "sub": "기타 (논문·통계·글쓰기)", "title": "RISS 학술연구정보", "url": "https://www.riss.kr"},
+    {"group": "탐구·연구", "sub": "기타 (논문·통계·글쓰기)", "title": "구글 학술검색", "url": "https://scholar.google.com"},
+    {"group": "탐구·연구", "sub": "기타 (논문·통계·글쓰기)", "title": "ScienceON", "url": "https://scienceon.kisti.re.kr"},
+    {"group": "탐구·연구", "sub": "기타 (논문·통계·글쓰기)", "title": "DBpia", "url": "https://www.dbpia.co.kr"},
+    {"group": "탐구·연구", "sub": "기타 (논문·통계·글쓰기)", "title": "KCI 한국학술지인용색인", "url": "https://www.kci.go.kr"},
+    {"group": "탐구·연구", "sub": "기타 (논문·통계·글쓰기)", "title": "Semantic Scholar", "url": "https://www.semanticscholar.org"},
+    {"group": "탐구·연구", "sub": "기타 (논문·통계·글쓰기)", "title": "KOSIS 국가통계", "url": "https://kosis.kr"},
+    {"group": "탐구·연구", "sub": "기타 (논문·통계·글쓰기)", "title": "공공데이터포털", "url": "https://www.data.go.kr"},
+    {"group": "탐구·연구", "sub": "기타 (논문·통계·글쓰기)", "title": "Our World in Data", "url": "https://ourworldindata.org"},
+    {"group": "탐구·연구", "sub": "기타 (논문·통계·글쓰기)", "title": "Overleaf (LaTeX)", "url": "https://www.overleaf.com"},
+    {"group": "탐구·연구", "sub": "기타 (논문·통계·글쓰기)", "title": "Zotero 참고문헌 관리", "url": "https://www.zotero.org"},
     {"group": "도구", "title": "Desmos 그래프", "url": "https://www.desmos.com/calculator"},
     {"group": "도구", "title": "GeoGebra", "url": "https://www.geogebra.org"},
     {"group": "도구", "title": "WolframAlpha", "url": "https://www.wolframalpha.com"},
@@ -722,9 +807,22 @@ def more_links():
     return out + [m for m in MORE_LINKS if m.get("url")]
 
 
+def top_links(items, n):
+    # 갈래(sub)가 있는 묶음은 갈래마다 앞에서 n개만 고름 (챗봇 카드는 개수 제한이 있어서)
+    seen, out = {}, []
+    for m in items:
+        if m.get("sub"):
+            k = (m["group"], m["sub"])
+            seen[k] = seen.get(k, 0) + 1
+            if seen[k] > n:
+                continue
+        out.append(m)
+    return out
+
+
 def all_links():
     items = [card(l["title"], l["desc"], [link_button(l.get("button") or "열기", l["url"])]) for l in live_links()]
-    more = [card(m["title"], "[" + m["group"] + "]", [link_button("열기", m["url"])]) for m in more_links()]
+    more = [card(m["title"], "[" + m["group"] + (" · " + m["sub"] if m.get("sub") else "") + "]", [link_button("열기", m["url"])]) for m in top_links(more_links(), 1)]
     outs = [carousel("textCard", items)]
     for i in (0, 10):
         if more[i:i + 10]:
@@ -769,8 +867,11 @@ def school_map():
 
 
 def ai_links():
-    items = [card(m["title"], "AI 사이트", [link_button("열기", m["url"])]) for m in MORE_LINKS if m.get("group") == "AI" and m.get("url")]
-    return reply([simple_text("🤖 자주 쓰는 AI 사이트예요."), carousel("textCard", items)])
+    ai = [m for m in MORE_LINKS if m.get("group") == "AI" and m.get("url")]
+    first = top_links(ai, 1)
+    picks = (first + [m for m in ai if m not in first])[:10]   # 기능마다 하나씩 먼저, 남는 자리는 순서대로
+    items = [card(m["title"], m.get("sub") or "AI 사이트", [link_button("열기", m["url"])]) for m in picks]
+    return reply([simple_text("🤖 기능별로 많이 쓰는 AI 사이트예요. 더 많은 목록은 앱의 링크 모음에 있어요."), carousel("textCard", items)])
 
 
 def connectors():
