@@ -838,8 +838,12 @@ def room_names():
     rooms = {}
     for f in MAP:
         for t in f["t"]:
-            if t[4]:
-                rooms.setdefault(squash(t[4]).lower(), [t[4], []])[1].append(f["b"] + " " + f["n"][0] + "층")
+            if not t[4]:
+                continue
+            # 괄호가 있는 이름은 괄호 안팎 이름으로도 찾을 수 있게 함: 대강의실(고헌마루) → 대강의실, 고헌마루
+            keys = [t[4]] + [x for x in re.findall(r"[^()]+", t[4]) if len(x) >= 2 and x not in (t[4], "샤워")]
+            for key in keys:
+                rooms.setdefault(squash(key).lower(), [t[4], []])[1].append(f["b"] + " " + f["n"][0] + "층")
     return rooms
 
 
