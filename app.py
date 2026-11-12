@@ -266,7 +266,7 @@ CONNECTORS = [
 ]
 
 # 3-4. 학교 지도 제작자, 급식 알림 시각
-MAP_BY = "지도 제작: ADEUS"
+MAP_BY = "학교 층별 안내판을 따라 그린 지도"
 PUSH_SLOTS = [  # (급식 코드, 이름, 알림 보내기 시작 시각, 이 시각이 지나면 그 끼니 알림은 안 보냄)
     ("1", "아침", 7.0, 7.75),
     ("2", "점심", 12.0, 12.75),
@@ -838,8 +838,8 @@ def room_names():
     rooms = {}
     for f in MAP:
         for t in f["t"]:
-            name = t[3].replace("|", " ")
-            rooms.setdefault(squash(name).lower(), [name, []])[1].append(f["n"][0])
+            if t[4]:
+                rooms.setdefault(squash(t[4]).lower(), [t[4], []])[1].append(f["b"] + " " + f["n"][0] + "층")
     return rooms
 
 
@@ -852,7 +852,7 @@ def map_button():
 
 def room(key):
     name, fl = ROOMS[key]
-    where = ", ".join(sorted(set(fl))) + "층"
+    where = ", ".join(sorted(set(fl)))
     return reply([{"textCard": card("📍 " + name, name + "은(는) " + where + "에 있어요.", map_button())}])
 
 
@@ -861,11 +861,11 @@ def school_map():
     for f in MAP:
         names = []
         for t in f["t"]:
-            n = t[3].replace("|", " ")
-            if n not in names:
-                names.append(n)
-        lines.append(f["n"][0] + "층: " + ", ".join(names))
-    return reply([simple_text("🗺 학교 지도\n\n" + "\n\n".join(lines)), {"textCard": card("층별 지도", "앱에서 층별 지도를 볼 수 있어요.", map_button())}])
+            if t[4] and t[4] not in names and not re.fullmatch(r"(외부인숙소 )?[ABC]\d{3}", t[4]):
+                names.append(t[4])   # 기숙사 호실은 너무 많아서 목록에서는 뺌
+        lines.append(f["b"] + " " + f["n"][0] + "층: " + (", ".join(names) or f.get("note", "")))
+    outs = split_text("🗺 학교 지도\n\n" + "\n\n".join(lines))[:2]
+    return reply(outs + [{"textCard": card("층별 지도", "앱에서 본관동·실험동 층별 지도를 볼 수 있어요.", map_button())}])
 
 
 def ai_links():
