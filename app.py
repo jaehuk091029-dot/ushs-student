@@ -239,6 +239,8 @@ MORE_LINKS = [
     {"group": "탐구·연구", "sub": "기타 (논문·통계·글쓰기)", "title": "Our World in Data", "url": "https://ourworldindata.org"},
     {"group": "탐구·연구", "sub": "기타 (논문·통계·글쓰기)", "title": "Overleaf (LaTeX)", "url": "https://www.overleaf.com"},
     {"group": "탐구·연구", "sub": "기타 (논문·통계·글쓰기)", "title": "Zotero 참고문헌 관리", "url": "https://www.zotero.org"},
+    {"group": "영어", "title": "북크리에이터", "url": "https://app.bookcreator.com"},
+    {"group": "영어", "title": "Question Lab", "url": "https://script.google.com/a/macros/ushs.hs.kr/s/AKfycbyfR2ayRgzAj9_mDfPeIbhlGeFllizeezZZsnaeSOsPo68M9MHXRQ9UdCloOwjqksMm/exec"},
     {"group": "도구", "title": "Desmos 그래프", "url": "https://www.desmos.com/calculator"},
     {"group": "도구", "title": "GeoGebra", "url": "https://www.geogebra.org"},
     {"group": "도구", "title": "WolframAlpha", "url": "https://www.wolframalpha.com"},
