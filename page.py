@@ -96,6 +96,31 @@ a.row:hover .t, .links a:hover{text-decoration:underline}
 .sgrp .sub:first-child{margin-top:4px}
 .sgrp:not(.open) .x2{display:none}
 .morebtn{margin-top:10px; background:#fff; color:#333; border:1px solid #4a4138; padding:7px 14px; font-size:14.5px; font-weight:700}
+.mtabs{display:flex; gap:4px; margin:2px 0 10px}
+.mtabs button{flex:1; min-width:0; background:#fff; color:#333; border:1px solid #4a4138; padding:6px 0; font-size:14.5px; font-weight:700; white-space:nowrap}
+.mtabs button[aria-pressed="true"]{background:#2b2520; color:#fff; border-color:#2b2520}
+.thead{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:6px}
+.thead b{font-size:17px}
+.thead .cbtn{padding:6px 14px; font-size:14.5px}
+.cal5{display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); border-top:1px solid #8a8076; border-left:1px solid #d9d9d9; margin:4px 0 12px}
+.cal5 > div{border-right:1px solid #d9d9d9; border-bottom:1px solid #d9d9d9; min-width:0}
+.cal5 .wd{background:#6a5f53; color:#fff; text-align:center; font-size:13.5px; font-weight:700; padding:3px 0}
+.cal5 .day{min-height:58px; padding:3px 3px 5px; background:#fff}
+.cal5 .day b{display:inline-block; min-width:20px; padding:0 3px; font-size:13.5px; font-variant-numeric:tabular-nums; text-align:center}
+.cal5 .day span{display:block; font-size:11.5px; line-height:1.3; margin-top:2px; color:#333; overflow-wrap:anywhere}
+.cal5 .day.out{background:#f3f1ee}
+.cal5 .day.out b, .cal5 .day.out span{color:#999}
+.cal5 .day.hol b, .cal5 .day span.hol{color:#c62f24}
+.cal5 .day span.exam{background:#f4dfbd; font-weight:700; padding:1px 2px}
+.cal5 .day.now b{background:#2b2520; color:#fff}
+.cal5 .day.out span.hol{color:#d99a94}
+.cal5 .day.out span.exam{background:#eee6d8}
+.srow .t{white-space:normal}
+.srow.past, .srow.past .side{color:#999}
+.srow.past:before{background:#bbb}
+.srow.hol .t{color:#c62f24}
+.srow.past.hol .t{color:#d99a94}
+.srow.exam .t{font-weight:700}
 .fav{width:18px; height:18px; flex:none; align-self:center; object-fit:contain}
 .row.hasfav{padding-left:0}
 .row.hasfav:before{display:none}
@@ -200,7 +225,7 @@ footer a{text-decoration:underline}
   </section>
   <section id="s-conn" class="wide" hidden><div class="shead"><h3><i>AI</i> 커넥터</h3></div><div id="conn"></div></section>
   <section id="s-more" class="wide" hidden><div class="shead"><h3>링크 모음</h3></div><div id="more"></div></section>
-  <footer>학생들이 편하게 쓰도록 만든 안내 페이지이며, 학교 공식 홈페이지가 아닙니다.<br>급식·학사일정: 나이스 교육정보 개방 포털 · 기사: 구글 뉴스</footer>
+  <footer>학생들이 편하게 쓰도록 만든 안내 페이지이며, 학교 공식 홈페이지가 아닙니다.<br>급식: 나이스 교육정보 개방 포털 · 학사일정: 학교 학사일정표, 나이스 · 기사: 구글 뉴스</footer>
 </div>
 
 <script>
@@ -365,12 +390,95 @@ footer a{text-decoration:underline}
       });
       $("s-conn").hidden = !(d.connectors || []).length;
       var sc = $("sched"); sc.textContent = "";
+      if (d.term && d.term.items && d.term.items.length){ drawTerm(); return; }
       if (d.schedule === null) sc.appendChild(el("div", "muted", "학사일정을 불러오지 못했어요."));
       else if (!d.schedule.length) sc.appendChild(el("div", "muted", "앞으로 " + d.days + "일 동안 등록된 일정이 없어요."));
       else d.schedule.forEach(function(x){ sc.appendChild(row({title:x.name, side:x.day + " · " + x.dday})); });
     }).catch(function(){
       $("sched").textContent = "";
       $("sched").appendChild(el("div", "muted", "학사일정을 불러오지 못했어요."));
+    });
+  }
+  // ----- 학기 학사일정표: 월별 목록 + 달력 -----
+  var WD = "일월화수목금토", termMonth = "", calOpen = false;
+  function ymd(s){ var p = s.split("-"); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])); }
+  function iso(d){ return d.toISOString().slice(0, 10); }
+  function plus(d, n){ return new Date(d.getTime() + n * 86400000); }
+  function md(s, noMonth){ var d = ymd(s); return (noMonth ? "" : (d.getUTCMonth() + 1) + "/") + d.getUTCDate() + "(" + WD[d.getUTCDay()] + ")"; }
+  function termSpan(x){ return x.s === x.e ? md(x.s) : md(x.s) + "~" + md(x.e, x.s.slice(0, 7) === x.e.slice(0, 7)); }
+  function termDday(x, today){
+    if (x.e < today) return "";
+    if (x.s <= today) return x.s === x.e ? "오늘" : "진행 중";
+    var n = Math.round((ymd(x.s) - ymd(today)) / 86400000);
+    return n === 1 ? "내일" : "D-" + n;
+  }
+  function kindCls(k){ return k === "휴일" ? "hol" : (k === "시험" ? "exam" : ""); }
+  function drawCal(T, ym){
+    var first = ymd(ym + "-01"), last = plus(new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 1)), -1);
+    var a = first.getUTCDay(), z = last.getUTCDay();
+    var from = plus(first, a === 6 ? 2 : (a === 0 ? 1 : 1 - a));   // 그 달 첫 평일이 든 주의 월요일
+    var to = plus(last, z === 6 ? -1 : (z === 0 ? -2 : 5 - z));    // 그 달 마지막 평일이 든 주의 금요일
+    var gFrom = iso(from), mFrom = iso(first), mTo = iso(last), labels = {};
+    function put(day, text, cls){ (labels[day] = labels[day] || []).push([text, cls]); }
+    T.items.forEach(function(x){
+      if (x.e < gFrom || x.s > iso(to)) return;
+      var cls = kindCls(x.kind);
+      if (x.s === x.e){ put(x.s, x.name, cls); return; }
+      if (x.kind === "휴일"){ for (var d = ymd(x.s); iso(d) <= x.e; d = plus(d, 1)) put(iso(d), x.name, cls); return; }
+      // 여러 날 이어지는 일정은 시작한 날(앞 달에 시작했으면 이 달 첫 평일)에 한 번만 적고 끝나는 날을 붙임
+      var at = x.s;
+      if (at < gFrom){ at = mFrom; while ([0, 6].indexOf(ymd(at).getUTCDay()) >= 0) at = iso(plus(ymd(at), 1)); }
+      put(at, x.name + " (~" + md(x.e).replace(/\(.\)$/, "") + ")", cls);
+    });
+    var g = el("div", "cal5");
+    g.setAttribute("role", "group"); g.setAttribute("aria-label", (+ym.slice(5)) + "월 달력 (월~금)");
+    "월화수목금".split("").forEach(function(w){ g.appendChild(el("div", "wd", w)); });
+    for (var d = from; d <= to; d = plus(d, 1)){
+      var w = d.getUTCDay(), k = iso(d);
+      if (w === 0 || w === 6) continue;
+      var c = el("div", "day"), ls = labels[k] || [];
+      if (k < mFrom || k > mTo) c.classList.add("out");
+      if (k === T.today) c.classList.add("now");
+      if (ls.some(function(l){ return l[1] === "hol"; })) c.classList.add("hol");
+      c.appendChild(el("b", "", d.getUTCDate() === 1 || k === gFrom ? (d.getUTCMonth() + 1) + "/" + d.getUTCDate() : String(d.getUTCDate())));
+      ls.forEach(function(l){ c.appendChild(el("span", l[1], l[0])); });
+      g.appendChild(c);
+    }
+    return g;
+  }
+  function drawTerm(){
+    var T = INFO.term, sc = $("sched");
+    if (!T) return;
+    sc.textContent = "";
+    if (T.months.indexOf(termMonth) < 0){
+      var cur = T.today.slice(0, 7);
+      termMonth = T.months.indexOf(cur) >= 0 ? cur : (cur < T.months[0] ? T.months[0] : T.months[T.months.length - 1]);
+    }
+    var tabs = el("div", "mtabs");
+    T.months.forEach(function(m){
+      var b = el("button", "", (+m.slice(5)) + "월");
+      b.setAttribute("aria-pressed", m === termMonth ? "true" : "false");
+      b.onclick = function(){ termMonth = m; drawTerm(); };
+      tabs.appendChild(b);
+    });
+    sc.appendChild(tabs);
+    var head = el("div", "thead");
+    head.appendChild(el("b", "", termMonth.slice(0, 4) + "년 " + (+termMonth.slice(5)) + "월"));
+    var tg = el("button", "cbtn", calOpen ? "달력 숨기기" : "달력 보기");
+    tg.setAttribute("aria-expanded", calOpen ? "true" : "false");
+    tg.onclick = function(){ calOpen = !calOpen; drawTerm(); };
+    head.appendChild(tg);
+    sc.appendChild(head);
+    if (calOpen) sc.appendChild(drawCal(T, termMonth));
+    var lo = termMonth + "-01", hi = termMonth + "-31";
+    var list = T.items.filter(function(x){ return x.s <= hi && x.e >= lo; });
+    if (!list.length) sc.appendChild(el("div", "muted", "이 달에는 등록된 일정이 없어요."));
+    list.forEach(function(x){
+      var dd = termDday(x, T.today), r = row({title: x.name, side: termSpan(x) + (dd ? " · " + dd : "")});
+      r.classList.add("srow");
+      if (!dd) r.classList.add("past");
+      if (kindCls(x.kind)) r.classList.add(kindCls(x.kind));
+      sc.appendChild(r);
     });
   }
   function loadNews(){
@@ -577,7 +685,11 @@ footer a{text-decoration:underline}
     (INFO.links || []).forEach(function(x){ add("바로가기", x.title, x.desc, {url: x.url}); });
     (INFO.more || []).forEach(function(x){ add("링크", x.title, x.group + (x.sub ? " · " + x.sub : ""), {url: x.url}); });
     (INFO.connectors || []).forEach(function(x){ add("AI 커넥터", x.title, x.desc, {sec: "s-conn"}); });
-    (INFO.schedule || []).forEach(function(x){ add("일정", x.name, x.day + " · " + x.dday, {sec: "s-sched"}); });
+    if (INFO.term) INFO.term.items.forEach(function(x){
+      var key = "일정" + x.name + x.s, sub = termSpan(x);   // 이름이 같은 일정(개학 등)도 날짜가 다르면 따로 보여 줌
+      if (!seen[key] && norm(x.name + sub).indexOf(n) >= 0){ seen[key] = 1; out.push({kind: "일정", title: x.name, sub: sub, act: {sec: "s-sched", month: (x.s < INFO.term.months[0] ? x.e : x.s).slice(0, 7)}}); }
+    });
+    else (INFO.schedule || []).forEach(function(x){ add("일정", x.name, x.day + " · " + x.dday, {sec: "s-sched"}); });
     (INFO.events || []).forEach(function(x){ add("행사", x.title, x.day, {sec: "s-events"}); });
     (INFO.clubs || []).forEach(function(x){ add("동아리", x.name, x.desc, {sec: "s-clubs"}); });
     (INFO.promo || []).forEach(function(x){ add("소식", x.title, x.desc, {sec: "s-promo"}); });
@@ -594,6 +706,7 @@ footer a{text-decoration:underline}
       var r = row({tag: h.kind, title: h.title, desc: h.sub, url: h.act.url});
       if (!h.act.url){ r.setAttribute("role", "button"); r.tabIndex = 0;
         r.onclick = function(){
+          if (h.act.month){ termMonth = h.act.month; drawTerm(); }
           if (h.act.room){ floorNow = h.act.floor; hitRoom = h.act.room; drawMap(); go("s-map"); } else go(h.act.sec);
           box.hidden = true;
         };
