@@ -4,7 +4,7 @@
 
 하는 일
   급식(조식·중식·석식), 학사일정 → 나이스(NEIS)에서 자동으로 가져옴
-  행사, 동아리, 홍보, 링크(기상곡 신청, 실험실 신청, 학교 위치알리미, 나이스 학부모서비스), 학교 기사 → 아래 설정에 적은 내용으로 안내
+  행사, 동아리, 홍보, 링크(기상곡 신청, 실험실 신청, 학교 위치알리미) · 링크 모음(나이스 학부모서비스 등), 학교 기사 → 아래 설정에 적은 내용으로 안내
 
 올리는 곳:  GitHub 저장소에 app.py, page.py, requirements.txt 를 올리고 Render 또는 Vercel 에 연결
            Render: Build Command = pip install -r requirements.txt / Start Command = python app.py
@@ -117,13 +117,6 @@ LINKS = [
         "by": "제작: 이병석 선생님",
         "keywords": ["위치알리미", "위치 알리미", "학교 위치", "위치"],
     },
-    {
-        "title": "나이스 학부모서비스",
-        "desc": "현장체험학습 신청서 등 각종 신청과 조회를 할 수 있어요.",
-        "url": "https://parents.neis.go.kr",
-        "button": "열기",
-        "keywords": ["학부모서비스", "학부모 서비스", "현장체험", "체험학습", "신청서", "나이스"],
-    },
 ]
 
 # 3-0. 게시판에서 고치는 바로가기
@@ -179,6 +172,9 @@ MORE_LINKS = [
     {"group": "AI", "sub": "이미지·영상·음성", "title": "Vrew", "url": "https://vrew.ai"},
     {"group": "AI", "sub": "이미지·영상·음성", "title": "Suno", "url": "https://suno.com"},
     {"group": "AI", "sub": "이미지·영상·음성", "title": "ElevenLabs", "url": "https://elevenlabs.io"},
+    {"group": "학교·행정", "title": "나이스 학부모서비스", "url": "https://parents.neis.go.kr",
+     "desc": "현장체험학습 신청서 등 각종 신청과 조회를 할 수 있어요.",
+     "keywords": ["학부모서비스", "학부모 서비스", "현장체험", "체험학습", "신청서", "나이스"]},
     {"group": "학교·행정", "title": "나이스플러스", "url": "https://www.neisplus.kr"},
     {"group": "학교·행정", "title": "나이스 대국민서비스", "url": "https://www.neis.go.kr"},
     {"group": "학교·행정", "title": "울산광역시교육청", "url": "https://www.use.go.kr"},
@@ -619,6 +615,9 @@ def by_words(utter):
         words = [l["title"]] + l.get("keywords", [])
         if any(squash(w) in u for w in words):
             return "link:" + l["title"]
+    for m in MORE_LINKS:   # 링크 모음에 있는 링크 가운데 검색어(keywords)를 적어 둔 것
+        if m.get("url") and any(squash(w) in u for w in m.get("keywords", [])):
+            return "link:" + m["title"]
     if re.search(r"알림|알람", u):
         return "noti"
     if re.search(r"기사|뉴스|신문|보도", u):
@@ -657,6 +656,9 @@ def handle(utter, block=""):
         for l in live_links():
             if l["title"] == what[5:]:
                 return one_link(l)
+        for m in MORE_LINKS:
+            if m["title"] == what[5:] and m.get("url"):
+                return one_link({"title": m["title"], "desc": m.get("desc") or "[" + m["group"] + "]", "url": m["url"]})
     if what == "noti":
         return noti()
     if what == "news":
