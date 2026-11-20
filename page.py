@@ -204,7 +204,7 @@ footer a{text-decoration:underline}
 
 <div class="wrap body">
   <div class="cols">
-    <section id="s-links" hidden><div class="shead"><h3>바로가기</h3></div><div id="links"></div></section>
+    <section id="s-links" hidden><div class="shead"><h3>바로가기</h3><a href="https://script.google.com/a/macros/ushs.hs.kr/s/AKfycby2gOXvtxIrsN8IEo8oOp2D0up47iO7iImfhoiqHPYY-iCouFVPZY330BDXmFn_7t0A/exec?go=links" target="_blank" rel="noopener">마스터 편집 ⟩</a></div><div id="links"></div></section>
     <section id="s-clubs" hidden><div class="shead"><h3>동아리</h3></div><button id="cbtn" class="cbtn">동아리 살펴보기</button><div id="cpanel" hidden><div class="chips" id="ccat"></div><div class="chips sub" id="csub" hidden></div><div id="clubs"></div></div></section>
     <section id="s-sched"><div class="shead"><h3><i>학사</i>일정</h3><a id="homelink" hidden target="_blank" rel="noopener">학교 홈페이지 ⟩</a></div><div id="sched"><div class="muted">불러오는 중…</div></div></section>
     <section id="s-news" hidden><div class="shead"><h3><i>학교</i> 기사</h3><a href="https://news.google.com/search?q=%EC%9A%B8%EC%82%B0%EA%B3%BC%ED%95%99%EA%B3%A0&hl=ko&gl=KR&ceid=KR:ko" target="_blank" rel="noopener">더보기 ⟩</a></div><div id="news"></div></section>
