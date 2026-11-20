@@ -23,7 +23,9 @@ GitHub 에서 이 파일을 고치고 저장(Commit)하면 1분쯤 뒤 챗봇에
 """
 
 import base64
+import csv
 import hashlib
+import io
 import json
 import os
 import sys
@@ -123,6 +125,14 @@ LINKS = [
         "keywords": ["학부모서비스", "학부모 서비스", "현장체험", "체험학습", "신청서", "나이스"],
     },
 ]
+
+# 3-0. 게시판에서 고치는 바로가기
+#    게시판의 "관리 → 바로가기 링크"에서 마스터가 고친 목록이 아래 구글 시트에 저장되고,
+#    서버는 2분마다 그 시트를 읽어서 위 LINKS 대신 씀 (앱의 바로가기와 챗봇 둘 다).
+#    시트를 읽지 못하면 위 LINKS 를 그대로 씀. "" 로 비워 두면 이 기능이 꺼지고 늘 위 LINKS 를 씀.
+#    시트 주소 https://docs.google.com/spreadsheets/d/○○○/edit 에서 ○○○ 부분을 적음
+LINKS_SHEET = "1FXkwuFeoYGneGNeMJ6dtLyRA_tHRo4f-58P4J0JhOos"
+LINKS_TTL = 120            # 시트를 다시 읽는 간격(초)
 
 # 3-1. 링크 모음 (앱 맨 아래 "링크 모음"과 챗봇 "링크 모음"에 나옴)
 #    group 이 같은 것끼리 묶여 나옴. 한 줄 추가하면 바로 늘어남. "학교 홈페이지"는 나이스에서 자동으로 찾아 넣음
@@ -498,8 +508,55 @@ def quick(label, text=None):
     return {"label": str(label)[:14], "action": "message", "messageText": text or label}
 
 
+def read_sheet_links():
+    # 게시판에서 마스터가 고친 바로가기 목록을 구글 시트(링크가 있으면 누구나 보기)에서 읽어 옴
+    r = requests.get("https://docs.google.com/spreadsheets/d/" + LINKS_SHEET + "/export", params={"format": "csv"}, timeout=2.5)
+    r.raise_for_status()
+    out, seen = [], set()
+    for row in csv.DictReader(io.StringIO(r.content.decode("utf-8-sig"))):
+        def get(k, n):
+            return " ".join(str(row.get(k) or "").split())[:n]
+        title, url = get("title", 40), get("url", 600)
+        if not title or title in seen or not re.match(r"https?://\S+$", url):
+            continue   # 이름이 없거나 겹치는 줄, http 로 시작하지 않는 주소는 건너뜀
+        seen.add(title)
+        item = {"title": title, "desc": get("desc", 300), "url": url, "button": get("button", 14) or "열기",
+                "keywords": [w.strip() for w in get("keywords", 300).split(",") if w.strip()][:12]}
+        if get("by", 80):
+            item["by"] = get("by", 80)
+        out.append(item)
+        if len(out) >= 30:
+            break
+    if not out:
+        raise ValueError("시트에서 바로가기를 찾지 못함")   # 시트가 공개되어 있지 않으면 로그인 화면이 와서 여기로 옴
+    return out
+
+
+def refresh_links():
+    try:
+        cache["links"] = (time.time(), read_sheet_links())
+    except Exception as e:
+        print("[오류] 바로가기 시트", repr(e))
+        old = cache.get("links")
+        # 30초 뒤에 다시 읽어 봄. 그동안은 전에 읽어 둔 목록을, 그것도 없으면 위 LINKS 를 씀
+        cache["links"] = (time.time() - LINKS_TTL + 30, old[1] if old else None)
+    finally:
+        cache.pop("links-busy", None)
+
+
 def live_links():
-    return [l for l in LINKS if l.get("url")]   # 주소가 비어 있는 링크는 숨김
+    links = LINKS
+    if LINKS_SHEET:
+        hit = cache.get("links")
+        if not hit:
+            refresh_links()   # 서버가 막 켜졌을 때 한 번만 기다림 (길어도 2.5초)
+            hit = cache.get("links")
+        elif time.time() - hit[0] > LINKS_TTL and not cache.get("links-busy"):
+            cache["links-busy"] = True   # 지금은 읽어 둔 목록을 바로 돌려주고, 새 목록은 뒤에서 받아 둠
+            threading.Thread(target=refresh_links, daemon=True).start()
+        if hit and hit[1]:
+            links = hit[1]
+    return [l for l in links if l.get("url")]   # 주소가 비어 있는 링크는 숨김
 
 
 def main_quick():
@@ -1421,7 +1478,10 @@ def icon():
 def status():
     code = SCHOOL_CODE or "아직 못 찾음"
     key = "등록됨" if NEIS_KEY else "없음(조회 개수 제한)"
-    return (f"{SCHOOL_NAME} 서버 작동 중\n학교코드: {code}\n나이스 인증키: {key}\n"
+    n = len(live_links())
+    hit = cache.get("links")
+    src = "게시판에서 고친 목록" if (LINKS_SHEET and hit and hit[1]) else "기본 목록"
+    return (f"{SCHOOL_NAME} 서버 작동 중\n학교코드: {code}\n나이스 인증키: {key}\n바로가기: {src} {n}개\n"
             "앱: /\n챗봇 미리보기: /test?q=내일 급식\n카카오 스킬 URL 끝: /skill"), 200, {"Content-Type": "text/plain; charset=utf-8"}
 
 
@@ -1454,4 +1514,6 @@ def test():
 if __name__ == "__main__":
     if push_on():
         threading.Thread(target=push_keeper, daemon=True).start()
+    if LINKS_SHEET:
+        threading.Thread(target=live_links, daemon=True).start()   # 바로가기 목록을 미리 읽어 둠
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False, threaded=True)
